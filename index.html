@@ -86,6 +86,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <li class="nav-item"><a href="#about" class="nav-link">About</a></li>
                     <li class="nav-item"><a href="#skills" class="nav-link">Skills</a></li>
                     <li class="nav-item"><a href="#projects" class="nav-link">Projects</a></li>
+                    <li class="nav-item"><a href="docgen-studio/" class="nav-link nav-featured">DocGen <span class="nav-new">New</span></a></li>
                     <li class="nav-item"><a href="#contact" class="nav-link">Contact</a></li>
                 </ul>
                 <div class="hamburger" role="button" tabindex="0" aria-label="Toggle navigation" aria-controls="primary-menu" aria-expanded="false"> <span class="bar"></span><span class="bar"></span><span class="bar"></span> </div>
@@ -109,7 +110,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         Passionate about building robust, scalable, and efficient backend systems. Specialized in creating APIs, databases, and server-side solutions that power modern applications.
                     </p>
                     <div class="hero-buttons">
-                        <a href="#projects" class="btn btn-primary">View My Work</a>
+                        <a href="docgen-studio/" class="btn btn-primary">DocGen Studio</a>
+                        <a href="#projects" class="btn btn-secondary">View My Work</a>
                         <a href="#contact" class="btn btn-secondary">Get In Touch</a>
                     </div>
                 </div>
@@ -128,6 +130,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </section>
     </header>
     <main id="main" role="main">
+        <section id="featured" class="featured-banner" aria-labelledby="featured-title">
+            <div class="container featured-banner-grid">
+                <div class="featured-copy">
+                    <p class="featured-kicker">Featured product</p>
+                    <h2 id="featured-title">DocGen Studio</h2>
+                    <p>A Chrome extension that records clicks, captures annotated screenshots, and turns a live walkthrough into a SaaS how-to guide. Export PDF or Markdown. Optional AI writing with your own OpenRouter key.</p>
+                    <div class="hero-buttons">
+                        <a href="docgen-studio/" class="btn btn-primary">Open product page</a>
+                        <a href="docgen-studio/how-to-use.html" class="btn btn-secondary">How to use</a>
+                    </div>
+                </div>
+                <img class="featured-art" src="docgen-studio/promo.png" width="440" height="280" alt="DocGen Studio — record, annotate, and export how-to guides">
+            </div>
+        </section>
         <!-- About Section -->
         <section id="about" class="about" aria-labelledby="about-title">
             <div class="container">
@@ -218,6 +234,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div class="container">
                 <h2 id="projects-title" class="section-title">Featured Projects</h2>
                 <div class="projects-grid">
+                    <article class="project-card project-card-featured">
+                        <div class="project-image"><img src="docgen-studio/icon.png" width="72" height="72" alt=""></div>
+                        <div class="project-content">
+                            <p class="project-badge">Featured</p>
+                            <h3>DocGen Studio</h3>
+                            <p>Chrome extension that records clicks, annotates screenshots, and exports step-by-step SaaS documentation as PDF or Markdown.</p>
+                            <div class="project-tech" role="list" aria-label="Tech stack">
+                                <span role="listitem">Chrome Extension</span>
+                                <span role="listitem">JavaScript</span>
+                                <span role="listitem">jsPDF</span>
+                            </div>
+                            <div class="project-links">
+                                <a href="docgen-studio/" class="project-link">Product</a>
+                                <a href="docgen-studio/how-to-use.html" class="project-link">How to use</a>
+                            </div>
+                        </div>
+                    </article>
                     <article class="project-card">
                         <div class="project-image" aria-hidden="true"><i class="fas fa-shopping-cart" aria-hidden="true"></i></div>
                         <div class="project-content">

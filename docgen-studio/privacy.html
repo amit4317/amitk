@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocGen Studio Privacy Policy</title>
+    <meta name="description" content="Privacy policy for the DocGen Studio Chrome extension. Data stays on your device. Optional AI writing sends click labels only.">
+    <link rel="canonical" href="https://amitk.pages.dev/docgen-studio/privacy.html">
+    <link rel="icon" href="icon.png">
+    <link rel="stylesheet" href="../styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo"><a href="../index.html"><h2>AK</h2></a></div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="../index.html" class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="./" class="nav-link">DocGen Studio</a></li>
+                <li class="nav-item"><a href="how-to-use.html" class="nav-link">How to use</a></li>
+                <li class="nav-item"><a href="privacy.html" class="nav-link nav-featured" aria-current="page">Privacy</a></li>
+                <li class="nav-item"><a href="../index.html#contact" class="nav-link">Contact</a></li>
+            </ul>
+            <div class="hamburger" aria-label="Toggle navigation"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+        </div>
+    </nav>
+    <main>
+        <section>
+            <article class="container policy-article">
+                <p class="product-kicker">DocGen Studio</p>
+                <h1>Privacy Policy</h1>
+                <p class="meta">Last updated: August 23, 2026</p>
+
+                <p>DocGen Studio is a Chrome extension that records clicks on a page you choose, captures annotated screenshots of those clicks, and helps you turn the recording into a step-by-step SaaS how-to guide. You can export the guide as PDF or Markdown. Optional AI writing uses an API key that you provide.</p>
+
+                <h2>Data we do not collect</h2>
+                <p>DocGen Studio has no developer backend, analytics, advertising, or user accounts. We do not receive, sell, or share your data.</p>
+
+                <h2>Data stored on your device</h2>
+                <ul>
+                    <li>Your optional OpenRouter API key and model name, saved in Chrome local storage so the editor can draft titles and descriptions.</li>
+                    <li>Your screenshot mode preference (focused crop or full screenshot).</li>
+                    <li>Recorded steps, including screenshots and click metadata, held in extension memory until you stop recording, edit, or export. They are not uploaded to us.</li>
+                </ul>
+
+                <h2>Screenshots and page content</h2>
+                <p>While recording, the extension captures the visible tab and the label, type, and on-screen position of elements you click. This can include personal or confidential information that is already visible on the page. Screenshots stay on your device unless you export them yourself.</p>
+
+                <h2>Optional AI writing</h2>
+                <p>If you add an OpenRouter API key, the editor sends click labels and element types (for example, “user clicked a button labeled Save”) to OpenRouter so a model can draft a document title, summary, and step text. Screenshot images are not attached to that request. Your key is sent only to OpenRouter as a bearer token. OpenRouter and the model provider you select have their own privacy policies. If you do not add a key, nothing is sent to OpenRouter and the editor uses local fallback text.</p>
+
+                <h2>Permissions</h2>
+                <p>The extension can run on websites you visit so recording can start on the page you are documenting. It uses tab access to capture the active page and to open the editor. It uses downloads only when you export Markdown. It does not read your browsing history for any other purpose.</p>
+
+                <h2>Contact</h2>
+                <p>For privacy questions about this extension, email <a href="mailto:kumar.amit.code@gmail.com">kumar.amit.code@gmail.com</a> or use the Chrome Web Store listing support email.</p>
+            </article>
+        </section>
+    </main>
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Amit Kumar. <a href="./">DocGen Studio</a> · <a href="how-to-use.html">How to use</a></p>
+        </div>
+    </footer>
+    <script src="../script.js"></script>
+</body>
+</html>
