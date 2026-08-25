@@ -1,3 +1,119 @@
+/* ============================================================
+   Article / Guide content — typography & code blocks
+   ============================================================ */
+.guide-main {
+    color: #cbd5e1;
+}
+
+.guide-main h1,
+.guide-main h2,
+.guide-main h3,
+.guide-main h4 {
+    color: #e5e7eb;
+}
+
+.guide-main p,
+.guide-main li,
+.guide-main td,
+.guide-main th {
+    color: #cbd5e1;
+}
+
+.guide-main a {
+    color: var(--primary-400);
+}
+
+.guide-main strong,
+.guide-main b {
+    color: #e5e7eb;
+}
+
+/* Inline code (not inside pre) */
+.guide-main :not(pre) > code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.9em;
+    background: #0b1228;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.15em 0.4em;
+    color: #c7d2fe;
+}
+
+/* Code blocks */
+.guide-main pre {
+    background: #0a0f1f;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    overflow-x: auto;
+    margin: 16px 0;
+    line-height: 1.6;
+}
+
+.guide-main pre code {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: inherit;
+    font-size: 0.85rem;
+    line-height: inherit;
+    font-family: inherit;
+}
+
+/* Syntax highlighting tokens (basic) */
+.guide-main .code-keyword { color: #60a5fa; }
+.guide-main .code-class   { color: #f472b6; }
+.guide-main .code-property{ color: #a78bfa; }
+.guide-main .code-string  { color: #34d399; }
+.guide-main .code-comment { color: #64748b; }
+.guide-main .code-function{ color: #fbbf24; }
+.guide-main .code-number  { color: #f87171; }
+
+/* Tables in article content */
+.guide-main table {
+    color: #cbd5e1;
+    border-collapse: collapse;
+    width: 100%;
+    margin: 16px 0;
+}
+
+.guide-main th,
+.guide-main td {
+    border-bottom: 1px solid var(--border);
+    padding: 8px;
+    text-align: left;
+}
+
+.guide-main th {
+    color: #e5e7eb;
+    font-weight: 600;
+}
+
+.guide-main thead tr {
+    border-bottom: 2px solid var(--border);
+}
+
+/* Blockquotes */
+.guide-main blockquote {
+    border-left: 3px solid var(--primary);
+    padding-left: 16px;
+    margin: 16px 0;
+    color: var(--muted);
+    font-style: italic;
+}
+
+/* Horizontal rule */
+.guide-main hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 24px 0;
+}
+
+/* ============================================================
+   End article content
+   ============================================================ */
+
+
 /* Base styles */
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
