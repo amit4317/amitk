@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G2K98Y4CGE"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-G2K98Y4CGE');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="alternate" hreflang="en" href="https://amitk.pages.dev/projects/social-media-backend/" />
+    <link rel="alternate" hreflang="x-default" href="https://amitk.pages.dev/projects/social-media-backend/" />
+    <title>Social Media Backend Case Study — Django, PostgreSQL, Real-time | Amit Kumar</title>
+    <meta name="description" content="Case study: Real-time social media backend supporting 5K concurrent WebSocket connections. Django Channels, PostgreSQL, Redis pub/sub. Feed fan-out on write, real-time messaging.">
+    <link rel="canonical" href="https://amitk.pages.dev/projects/social-media-backend/">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Social Media Backend — 5K Concurrent WebSockets, Django Channels">
+    <meta property="og:description" content="Real-time social backend: Django/PostgreSQL/Redis. WebSocket messaging, feed fan-out, profile system. Architecture decisions and scale metrics.">
+    <meta property="og:url" content="https://amitk.pages.dev/projects/social-media-backend/">
+    <meta property="og:image" content="https://amitk.pages.dev/amit_kumar_backend_developer.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Social Media Backend — 5K Concurrent WebSockets">
+    <meta name="twitter:description" content="Django Channels, PostgreSQL, Redis pub/sub. Real-time messaging, feed fan-out on write.">
+    <meta name="twitter:image" content="https://amitk.pages.dev/amit_kumar_backend_developer.png">
+    <link rel="icon" href="../../favicon.ico">
+    <link rel="stylesheet" href="../../styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://amitk.pages.dev/"},
+            {"@type": "ListItem", "position": 2, "name": "Projects", "item": "https://amitk.pages.dev/#projects"},
+            {"@type": "ListItem", "position": 3, "name": "Social Media Backend", "item": "https://amitk.pages.dev/projects/social-media-backend/"}
+          ]
+        },
+        {
+          "@type": "TechArticle",
+          "headline": "Social Media Backend: 5K Concurrent WebSockets with Django Channels",
+          "description": "Real-time social media backend architecture: Django Channels for async WebSocket handling, PostgreSQL for relational data, Redis for pub/sub and caching. Feed fan-out on write strategy.",
+          "datePublished": "2026-08-25",
+          "dateModified": "2026-08-25",
+          "author": {"@type": "Person", "name": "Amit Kumar", "url": "https://amitk.pages.dev/"},
+          "publisher": {"@type": "Person", "name": "Amit Kumar"},
+          "mainEntityOfPage": "https://amitk.pages.dev/projects/social-media-backend/",
+          "image": "https://amitk.pages.dev/amit_kumar_backend_developer.png",
+          "keywords": ["Django", "Django Channels", "PostgreSQL", "Redis", "WebSocket", "Real-time", "Social Media", "System Design"]
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "Social Media Backend",
+          "applicationCategory": "SocialNetworkingApplication",
+          "operatingSystem": "Linux",
+          "description": "Real-time social media backend with WebSocket messaging, user profiles, content sharing, and feed generation.",
+          "url": "https://amitk.pages.dev/projects/social-media-backend/",
+          "author": {"@type": "Person", "name": "Amit Kumar"},
+          "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}
+        }
+      ]
+    }
+    </script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo"><a href="../../index.html"><h2>AK</h2></a></div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="../../index.html" class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="../../index.html#about" class="nav-link">About</a></li>
+                <li class="nav-item"><a href="../../index.html#projects" class="nav-link">Projects</a></li>
+                <li class="nav-item"><a href="../../docgen-studio/" class="nav-link nav-featured">DocGen <span class="nav-new">New</span></a></li>
+                <li class="nav-item"><a href="../../index.html#contact" class="nav-link">Contact</a></li>
+            </ul>
+            <div class="hamburger" aria-label="Toggle navigation"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+        </div>
+    </nav>
+
+    <main class="guide-main">
+        <header class="guide-hero container">
+            <p class="product-kicker">Case Study · Real-time Social Backend</p>
+            <h1>Social Media Backend: 5K Concurrent WebSockets</h1>
+            <p class="answer-block" id="answer"><strong>A real-time social media backend supporting 5,000+ concurrent WebSocket connections with sub-50ms message delivery.</strong> Built with Django Channels, PostgreSQL, and Redis. Features real-time messaging, feed fan-out on write, user profiles, and content sharing.</p>
+            <p class="guide-meta">Tech: Python · Django · Django Channels · PostgreSQL · Redis · WebSockets · ~4 weeks</p>
+        </header>
+
+        <nav class="jump-nav container" aria-label="Case study sections">
+            <a href="#architecture">Architecture</a>
+            <a href="#realtime">Real-time Layer</a>
+            <a href="#feed">Feed Generation</a>
+            <a href="#messaging">Messaging</a>
+            <a href="#data">Data Model</a>
+            <a href="#scale">Scaling</a>
+            <a href="#decisions">Key Decisions</a>
+        </nav>
+
+        <section id="architecture" class="container">
+            <h2>System Architecture</h2>
+            <p class="answer-block"><strong>Hybrid architecture: traditional Django views for REST API + Django Channels for WebSocket connections.</strong> Both share the same Django ORM and business logic. Redis serves as the channel layer for WebSocket message routing and as cache for feed data.</p>
+
+            <h3>Component diagram</h3>
+            <ul>
+                <li><strong>Load Balancer:</strong> AWS ALB (HTTP) + NLB (WebSocket) or single ALB with target groups</li>
+                <li><strong>Django Workers (REST):</strong> Gunicorn workers handling traditional requests (auth, profiles, posts CRUD)</li>
+                <li><strong>Daphne/Channels Workers:</strong> ASGI servers handling WebSocket lifecycle (connect, disconnect, messages)</li>
+                <li><strong>Redis Cluster:</strong> Channel layer (pub/sub for WebSocket broadcast) + feed cache + session store</li>
+                <li><strong>PostgreSQL:</strong> Primary database (users, posts, follows, messages, notifications)</li>
+                <li><strong>Celery + Redis:</strong> Background tasks (image processing, email, feed fan-out jobs)</li>
+            </ul>
+        </section>
+
+        <section id="realtime" class="container">
+            <h2>Real-time Layer (Django Channels)</h2>
+            <p class="answer-block"><strong>Django Channels extends Django to handle WebSockets, HTTP2, and other async protocols.</strong> Each WebSocket connection maps to a Consumer instance. Redis channel layer enables cross-process message broadcasting.</p>
+
+            <h3>Consumer structure</h3>
+            <pre><code>class NotificationConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.user = self.scope["user"]
+        if self.user.is_anonymous:
+            await self.close()
+            return
+        # Join user-specific group
+        self.group_name = f"user_{self.user.id}"
+        await self.channel_layer.group_add(self.group_name, self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        await self.channel_layer.group_discard(self.group_name, self.channel_name)
+
+    async def send_notification(self, event):
+        await self.send(text_data=json.dumps(event["data"]))</code></pre>
+
+            <h3>Connection scaling</h3>
+            <ul>
+                <li><strong>5K concurrent connections</strong> across 4 Daphne workers (1250 conn/worker)</li>
+                <li><strong>Memory per connection:</strong> ~2KB (minimal consumer state)</li>
+                <li><strong>Heartbeat:</strong> 30s ping/pong to detect dead connections</li>
+                <li><strong>Graceful shutdown:</strong> Drain connections before worker restart (Kubernetes preStop hook)</li>
+            </ul>
+        </section>
+
+        <section id="feed" class="container">
+            <h2>Feed Generation: Fan-out on Write</h2>
+            <p class="answer-block"><strong>Feed fan-out on write: when a user posts, the post ID is pushed to all followers' feed lists in Redis.</strong> Read path is O(1) — just fetch the pre-computed feed. Write path is O(followers) but async via Celery.</p>
+
+            <h3>Why fan-out on write?</h3>
+            <table style="width:100%; border-collapse:collapse; margin:16px 0; color:#cbd5e1;">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--border);">
+                        <th style="text-align:left; padding:8px;">Approach</th>
+                        <th style="text-align:left; padding:8px;">Read Latency</th>
+                        <th style="text-align:left; padding:8px;">Write Latency</th>
+                        <th style="text-align:left; padding:8px;">Storage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Fan-out on write</td><td style="padding:8px;">O(1) — Redis ZRANGE</td><td style="padding:8px;">O(followers) async</td><td style="padding:8px;">Higher (duplicate post IDs)</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Fan-out on read</td><td style="padding:8px;">O(followed × posts)</td><td style="padding:8px;">O(1)</td><td style="padding:8px;">Lower</td></tr>
+                    <tr><td style="padding:8px;">Hybrid (celebrity)</td><td style="padding:8px;">O(1) for most, merge for celebs</td><td style="padding:8px;">O(normal followers)</td><td style="padding:8px;">Moderate</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Implementation</h3>
+            <pre><code># On post creation (Celery task)
+def fan_out_post(post_id, author_id):
+    follower_ids = Follow.objects.filter(following_id=author_id)\
+                                 .values_list('follower_id', flat=True)
+    pipeline = redis.pipeline()
+    for fid in follower_ids:
+        pipeline.zadd(f"feed:{fid}", {post_id: time.time()})
+        pipeline.zremrangebyrank(f"feed:{fid}", 0, -1001)  # Keep latest 1000
+    pipeline.execute()</code></pre>
+
+            <h3>Celebrity handling</h3>
+            <p>Users with >10K followers are excluded from fan-out. Their posts are fetched at read time via a separate "celebrity posts" key and merged with the user's personal feed.</p>
+        </section>
+
+        <section id="messaging" class="container">
+            <h2>Real-time Messaging</h2>
+            <p class="answer-block"><strong>1:1 and group messaging via WebSocket with message persistence in PostgreSQL.</strong> Redis pub/sub routes messages to online recipients; offline recipients get push notifications via Celery.</p>
+
+            <h3>Message flow</h3>
+            <ol>
+                <li>Sender sends message via WebSocket → Django Channels consumer</li>
+                <li>Consumer validates, saves to PostgreSQL (<code>Message</code> model)</li>
+                <li>Consumer publishes to Redis channel <code>chat:{conversation_id}</code></li>
+                <li>All online participants in that conversation receive via WebSocket</li>
+                <li>For offline users: Celery task sends push notification (FCM/APNs)</li>
+            </ol>
+
+            <h3>Message model (simplified)</h3>
+            <pre><code>class Message(models.Model):
+    conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE)
+    sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    message_type = models.CharField(choices=[('text', 'Text'), ('image', 'Image'), ('file', 'File')])
+    read_by = models.ManyToManyField(User, related_name='read_messages', through='MessageRead')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['conversation', '-created_at']),  # Pagination
+            models.Index(fields=['sender', 'created_at']),
+        ]</code></pre>
+        </section>
+
+        <section id="data" class="container">
+            <h2>Data Model Highlights</h2>
+            <p class="answer-block"><strong>PostgreSQL for relational integrity: users, follows, posts, conversations, messages, notifications.</strong> Proper foreign keys, indexes, and constraints prevent data corruption at scale.</p>
+
+            <h3>Key tables & indexes</h3>
+            <ul>
+                <li><strong>Follow:</strong> Composite unique index on <code>(follower, following)</code>; index on <code>following</code> for "followers of X" queries</li>
+                <li><strong>Post:</strong> Index on <code>(author, -created_at)</code> for profile feed; <code>search_vector</code> (tsvector) for full-text search</li>
+                <li><strong>Conversation:</strong> Many-to-many via <code>ConversationParticipant</code>; index on <code>(user, -last_message_at)</code></li>
+                <li><strong>Notification:</strong> Index on <code>(recipient, -created_at, is_read)</code>; partitioned by month for retention</li>
+            </ul>
+        </section>
+
+        <section id="scale" class="container">
+            <h2>Scaling Metrics</h2>
+            <p class="answer-block"><strong>Load test: 5,200 concurrent WebSocket connections, 1,200 msg/sec sustained, <50ms p99 delivery latency.</strong> Cost: ~$220/month (4x Daphne, 3x Gunicorn, PostgreSQL db.t3.medium, ElastiCache r6g.large).</p>
+
+            <h3>Bottlenecks discovered & fixed</h3>
+            <ul>
+                <li><strong>Channel layer backlog:</strong> Redis pub/sub queue grew under burst. Fixed by increasing Daphne worker count and adding backpressure (reject new connections when queue > 10K).</li>
+                <li><strong>Feed fan-out latency:</strong> Large follower batches blocked Celery workers. Fixed by chunking (100 followers/batch) and priority queue for high-priority users.</li>
+                <li><strong>PostgreSQL connection exhaustion:</strong> Default pool (20) too small for async workers. Increased to 100 per worker + PgBouncer.</li>
+            </ul>
+        </section>
+
+        <section id="decisions" class="container">
+            <h2>Key Architecture Decisions</h2>
+
+            <article class="feature-block">
+                <h3>ADR-001: Django Channels over Node.js/Socket.io for real-time</h3>
+                <p><strong>Decision:</strong> Stay in Python/Django ecosystem. <strong>Context:</strong> Team expertise, shared models/auth, single codebase. <strong>Trade-off:</strong> Channels less mature than Socket.io; higher memory per connection. Mitigated by worker scaling.</p>
+            </article>
+
+            <article class="feature-block">
+                <h3>ADR-002: Fan-out on write for feeds</h3>
+                <p><strong>Decision:</strong> Pre-compute feeds in Redis. <strong>Context:</strong> Read-heavy (100:1 read:write), followers < 5K typical. <strong>Trade-off:</strong> Write amplification; celebrity problem. Solved with hybrid approach.</p>
+            </article>
+
+            <article class="feature-block">
+                <h3>ADR-003: PostgreSQL for messages (not MongoDB)</h3>
+                <p><strong>Decision:</strong> Relational model for conversations, participants, read receipts. <strong>Context:</strong> Complex queries (unread counts, search, compliance). <strong>Trade-off:</strong> More schema rigidity; mitigated by JSONB for extensible message metadata.</p>
+            </article>
+        </section>
+
+        <section class="container guide-cta">
+            <h2>Explore More</h2>
+            <p>View other backend case studies or get in touch to discuss your project.</p>
+            <div class="hero-buttons">
+                <a href="../ecommerce-api/" class="btn btn-primary">E-Commerce API →</a>
+                <a href="../analytics-dashboard-api/" class="btn btn-secondary">Analytics Dashboard API →</a>
+                <a href="../../index.html#contact" class="btn btn-secondary">Hire Me</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Amit Kumar. <a href="../../index.html">← Back to Portfolio</a></p>
+        </div>
+    </footer>
+    <script src="../../script.js"></script>
+</body>
+</html>

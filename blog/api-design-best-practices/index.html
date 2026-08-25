@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G2K98Y4CGE"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-G2K98Y4CGE');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="alternate" hreflang="en" href="https://amitk.pages.dev/blog/api-design-best-practices/" />
+    <link rel="alternate" hreflang="x-default" href="https://amitk.pages.dev/blog/api-design-best-practices/" />
+    <title>REST API Design Best Practices: A Practitioner's Field Guide | Amit Kumar</title>
+    <meta name="description" content="Practical REST API design best practices: resource naming, HTTP methods and status codes, versioning, cursor pagination, RFC 7807 errors, rate limiting, and idempotency keys — from production experience.">
+    <link rel="canonical" href="https://amitk.pages.dev/blog/api-design-best-practices/">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="REST API Design Best Practices: A Practitioner's Field Guide">
+    <meta property="og:description" content="Resource naming, status codes, versioning, pagination, RFC 7807 errors, rate limiting, idempotency keys. Decisions and trade-offs from production APIs.">
+    <meta property="og:url" content="https://amitk.pages.dev/blog/api-design-best-practices/">
+    <meta property="og:image" content="https://amitk.pages.dev/amit_kumar_backend_developer.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="REST API Design Best Practices: A Practitioner's Field Guide">
+    <meta name="twitter:description" content="Practitioner's guide to REST API design. Specific decisions, trade-off tables, and anti-pattern fixes — not tutorial fluff.">
+    <meta name="twitter:image" content="https://amitk.pages.dev/amit_kumar_backend_developer.png">
+    <link rel="icon" href="../../favicon.ico">
+    <link rel="stylesheet" href="../../styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://amitk.pages.dev/"},
+            {"@type": "ListItem", "position": 2, "name": "Blog", "item": "https://amitk.pages.dev/blog/"},
+            {"@type": "ListItem", "position": 3, "name": "API Design Best Practices", "item": "https://amitk.pages.dev/blog/api-design-best-practices/"}
+          ]
+        },
+        {
+          "@type": "TechArticle",
+          "headline": "REST API Design Best Practices: A Practitioner's Field Guide",
+          "description": "Practical REST API design best practices: resource naming, HTTP methods and status codes, versioning strategies, cursor pagination, RFC 7807 error responses, rate limiting, and idempotency keys.",
+          "datePublished": "2026-08-25",
+          "dateModified": "2026-08-25",
+          "author": {"@type": "Person", "name": "Amit Kumar", "url": "https://amitk.pages.dev/"},
+          "publisher": {"@type": "Person", "name": "Amit Kumar"},
+          "mainEntityOfPage": "https://amitk.pages.dev/blog/api-design-best-practices/",
+          "image": "https://amitk.pages.dev/amit_kumar_backend_developer.png",
+          "keywords": ["REST API", "API Design", "HTTP Status Codes", "API Versioning", "Cursor Pagination", "RFC 7807", "Rate Limiting", "Idempotency Keys"]
+        }
+      ]
+    }
+    </script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo"><a href="../../index.html"><h2>AK</h2></a></div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="../../index.html" class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="../../index.html#about" class="nav-link">About</a></li>
+                <li class="nav-item"><a href="../../index.html#projects" class="nav-link">Projects</a></li>
+                <li class="nav-item"><a href="../../docgen-studio/" class="nav-link nav-featured">DocGen <span class="nav-new">New</span></a></li>
+                <li class="nav-item"><a href="../../index.html#contact" class="nav-link">Contact</a></li>
+            </ul>
+            <div class="hamburger" aria-label="Toggle navigation"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+        </div>
+    </nav>
+
+    <main class="guide-main">
+        <header class="guide-hero container">
+            <p class="product-kicker">API Design Guide · Backend Engineering</p>
+            <h1>REST API Design Best Practices: A Practitioner's Field Guide</h1>
+            <p class="answer-block" id="answer"><strong>A good REST API is predictable: resources named consistently, status codes trusted, errors machine-readable, pagination that survives scale, and mutating operations that are safe to retry.</strong> Every decision below comes from running production APIs serving thousands of integrators — including what broke, what we changed, and why.</p>
+            <p class="guide-meta">~14 min read · For backend engineers &amp; API designers · <a href="../database-scaling-strategies/">Next: Database Scaling Strategies →</a></p>
+        </header>
+
+        <nav class="jump-nav container" aria-label="Article sections">
+            <a href="#url-design">URL &amp; Resource Design</a>
+            <a href="#http-methods">Methods &amp; Status Codes</a>
+            <a href="#versioning">Versioning</a>
+            <a href="#pagination">Pagination &amp; Filtering</a>
+            <a href="#errors">Error Responses</a>
+            <a href="#rate-limiting">Rate Limiting</a>
+            <a href="#idempotency-keys">Idempotency Keys</a>
+            <a href="#security">Security Essentials</a>
+            <a href="#anti-patterns">Anti-Patterns Catalog</a>
+        </nav>
+
+        <section id="url-design" class="container">
+            <h2>URL &amp; Resource Design</h2>
+            <p class="answer-block"><strong>Name URLs after resources (nouns), never actions (verbs): plural collections, kebab-case segments, identifiers in the path, and behavior expressed through HTTP methods and query parameters.</strong> If your URL contains <code>get</code>, <code>create</code>, or <code>do</code>, you've written an RPC endpoint wearing REST clothing.</p>
+
+            <pre><code>// Bad — RPC over HTTP
+POST   /createOrder
+GET    /getUserOrders?userId=42
+POST   /orders/7/cancelOrder
+
+// Good — resource-oriented
+POST   /orders               // create an order
+GET    /users/42/orders      // list orders belonging to user 42
+PATCH  /orders/7             // { "status": "cancelled" } — state transition
+DELETE /orders/7             // remove, if the business allows deletion</code></pre>
+
+            <h3>The naming rules that matter</h3>
+            <ul>
+                <li><strong>Plural nouns:</strong> <code>/orders</code>, not <code>/order</code>. A collection holds many; a single item lives at <code>/orders/{id}</code>.</li>
+                <li><strong>kebab-case for multi-word segments:</strong> <code>/payment-methods</code>, not <code>/payment_methods</code> or <code>/paymentMethods</code>.</li>
+                <li><strong>Path identifies, query refines:</strong> identity in the path (<code>/orders/7</code>), filtering/sorting/pagination in the query string.</li>
+                <li><strong>Nest at most one level:</strong> <code>/users/{id}/orders</code> is fine. <code>/users/{id}/orders/{orderId}/items/{itemId}/reviews</code> is not.</li>
+                <li><strong>No trailing verbs:</strong> model actions as state changes (<code>PATCH</code> the status) or, rarely, as documented sub-resources (<code>POST /orders/7/cancellation</code>).</li>
+            </ul>
+
+            <h3>When to avoid nesting entirely</h3>
+            <p>Flatten a nested route to a top-level collection with a filter parameter when any of these hold: the child has a lifecycle independent of the parent (comments survive post deletion for moderation), the child is reachable from multiple parents (a product appearing in many categories), or the URL would exceed two path segments beyond the root. Deep nesting also fragments cache keys, complicates permission checks, and forces clients to thread four IDs through every call.</p>
+
+            <pre><code>// Instead of:
+GET /tenants/8/workspaces/31/projects/55/tasks/902/comments
+
+// Prefer:
+GET /comments?task_id=902
+// One canonical location, one permission check, one set of pagination params.</code></pre>
+        </section>
+
+        <section id="http-methods" class="container">
+            <h2>HTTP Methods &amp; Status Codes: The Ones That Actually Matter</h2>
+            <p class="answer-block"><strong>Five methods (<code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>PATCH</code>, <code>DELETE</code>) and about a dozen status codes cover 95% of real API traffic.</strong> What matters more than coverage is honoring the idempotency contract of each method — clients build retry logic directly on top of it.</p>
+
+            <table style="width:100%; border-collapse:collapse; margin:16px 0; color:#cbd5e1; font-size:14px;">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--border);">
+                        <th style="text-align:left; padding:8px;">Method</th>
+                        <th style="text-align:left; padding:8px;">Safe</th>
+                        <th style="text-align:left; padding:8px;">Idempotent</th>
+                        <th style="text-align:left; padding:8px;">Typical Success</th>
+                        <th style="text-align:left; padding:8px;">Use For</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">GET</td><td style="padding:8px;">Yes</td><td style="padding:8px;">Yes</td><td style="padding:8px;">200</td><td style="padding:8px;">Read; must have no side effects</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">HEAD</td><td style="padding:8px;">Yes</td><td style="padding:8px;">Yes</td><td style="padding:8px;">200</td><td style="padding:8px;">Metadata only — existence checks, cache validation</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">POST</td><td style="padding:8px;">No</td><td style="padding:8px;"><strong>No</strong></td><td style="padding:8px;">201, 202</td><td style="padding:8px;">Create; any non-idempotent operation</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">PUT</td><td style="padding:8px;">No</td><td style="padding:8px;">Yes</td><td style="padding:8px;">200, 204</td><td style="padding:8px;">Full replacement at a known URL</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">PATCH</td><td style="padding:8px;">No</td><td style="padding:8px;">Not guaranteed*</td><td style="padding:8px;">200</td><td style="padding:8px;">Partial update</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">DELETE</td><td style="padding:8px;">No</td><td style="padding:8px;">Yes</td><td style="padding:8px;">204</td><td style="padding:8px;">Removal; repeated calls converge to same state</td></tr>
+                </tbody>
+            </table>
+            <p>*<code>PATCH { "views": "increment" }</code> is not idempotent; <code>PATCH { "status": "archived" }</code> is. Design patches to be idempotent wherever possible — retries become free.</p>
+
+            <h3>Status code shortlist</h3>
+            <p>Use these, in practice: <code>200 OK</code> (read/update succeeded), <code>201 Created</code> (with a <code>Location</code> header pointing at the new resource), <code>202 Accepted</code> (queued for async processing), <code>204 No Content</code> (delete or empty-body update), <code>304 Not Modified</code> (conditional GET), <code>400 Bad Request</code> (malformed), <code>401 Unauthorized</code> (missing/expired credentials — the name lies; it means unauthenticated), <code>403 Forbidden</code> (authenticated, not permitted), <code>404 Not Found</code>, <code>409 Conflict</code> (state clash: duplicate email, stale version), <code>422 Unprocessable Entity</code> (well-formed but semantically invalid), <code>429 Too Many Requests</code>, <code>500 Internal Server Error</code> (your bug), <code>503 Service Unavailable</code> (maintenance/overload).</p>
+
+            <h3>Mistakes that break clients</h3>
+            <ul>
+                <li><strong>200 with an error body</strong> (<code>{ "success": false }</code>): monitoring, caches, gateways, and retry libraries all read the status code. Your "failure" gets counted as success and cached.</li>
+                <li><strong>500 for validation errors:</strong> clients can't distinguish their bug from yours, so nobody fixes anything. Client-input problems are 400/422, always.</li>
+                <li><strong>404 on repeated DELETE:</strong> makes a safe retry look like an error. If deletion is idempotent, return 204 again — or track tombstones.</li>
+                <li><strong>201 for work that hasn't happened:</strong> if the request was enqueued, say so with 202 plus a status resource the client can poll.</li>
+                <li><strong>403 vs 404 confusion:</strong> 404 on a resource the caller isn't allowed to know exists is legitimate security hygiene; 403 tells them it exists. Pick a policy per resource sensitivity and document it.</li>
+            </ul>
+        </section>
+
+        <section id="versioning" class="container">
+            <h2>Versioning Strategies</h2>
+            <p class="answer-block"><strong>Version public APIs in the URL path (<code>/v1/</code>) — it's visible in logs, trivially debuggable with curl, and plays perfectly with CDNs.</strong> Header-based versioning buys cleaner URLs at the cost of invisibility; media-type versioning is the most principled and the least practical. Additive changes never bump a version — only breaking ones do.</p>
+
+            <table style="width:100%; border-collapse:collapse; margin:16px 0; color:#cbd5e1; font-size:14px;">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--border);">
+                        <th style="text-align:left; padding:8px;">Strategy</th>
+                        <th style="text-align:left; padding:8px;">Example</th>
+                        <th style="text-align:left; padding:8px;">Pros</th>
+                        <th style="text-align:left; padding:8px;">Cons</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">URL path</td><td style="padding:8px;"><code>GET /v1/orders</code></td><td style="padding:8px;">Obvious in logs and docs; curl-friendly; clean CDN/proxy routing; trivial load-balancer splits</td><td style="padding:8px;">Coarse-grained; URLs churn between versions; purists object</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Custom header</td><td style="padding:8px;"><code>X-API-Version: 2026-08-25</code></td><td style="padding:8px;">Stable URLs; supports fine-grained or date-based versions</td><td style="padding:8px;">Invisible in logs/browser; breaks naive caching; support tickets spike ("works in Postman, not in prod")</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Media type</td><td style="padding:8px;"><code>Accept: application/vnd.acme.v2+json</code></td><td style="padding:8px;">Most HTTP-correct; per-representation versioning; content negotiation built in</td><td style="padding:8px;">Hardest to implement and debug; poor tooling support; every client must set Accept correctly</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Recommendation</h3>
+            <p>Ship <code>/v1/</code> for anything consumed outside your organization. Bump the major version only for breaking changes: removing or renaming fields, changing field semantics or types, making optional fields required, altering status-code behavior, or changing URL structure. Adding new optional fields, new endpoints, or new enum values is <em>not</em> breaking — clients that follow forward-compatible parsing (ignore unknown fields) absorb those for free, and you should say exactly that in your docs.</p>
+
+            <pre><code>// Express: versioned routers share middleware, diverge handlers
+app.use("/v1", v1Router);
+app.use("/v2", v2Router);
+
+// Deprecation signals on old versions (RFC 8594):
+Sunset: Sat, 01 Jan 2027 00:00:00 GMT
+Deprecation: true
+Link: &lt;https://api.example.com/changelog&gt;; rel="deprecation"</code></pre>
+
+            <p>Run old and new versions in parallel for a deprecation window — six months minimum for public APIs — monitor per-version traffic, and email integrators who are still calling the sunset version. Traffic-based sunsetting beats calendar-based sunsetting: give laggards notice proportional to their usage, not a cliff.</p>
+        </section>
+
+        <section id="pagination" class="container">
+            <h2>Pagination, Filtering &amp; Sorting</h2>
+            <p class="answer-block"><strong>Default to cursor pagination. Offset pagination scans every skipped row and shifts results under the client when data is inserted mid-scroll.</strong> Reserve offset pagination for bounded datasets (under ~10K rows) or admin screens that genuinely need "jump to page 7."</p>
+
+            <table style="width:100%; border-collapse:collapse; margin:16px 0; color:#cbd5e1; font-size:14px;">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--border);">
+                        <th style="text-align:left; padding:8px;">Dimension</th>
+                        <th style="text-align:left; padding:8px;">Cursor</th>
+                        <th style="text-align:left; padding:8px;">Offset</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Cost of deep pages</td><td style="padding:8px;">Constant — indexed seek past last-seen row</td><td style="padding:8px;">Linear — <code>OFFSET 100000</code> reads and discards 100K rows</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Rows inserted mid-scroll</td><td style="padding:8px;">Stable — no duplicates or skips</td><td style="padding:8px;">Items shift between pages; users see items twice or miss them</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Jump to arbitrary page</td><td style="padding:8px;">Not supported</td><td style="padding:8px;">Native</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Total count</td><td style="padding:8px;">Requires separate <code>COUNT(*)</code> (expensive)</td><td style="padding:8px;">Natural fit</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Client complexity</td><td style="padding:8px;">Opaque token; follow <code>next_cursor</code></td><td style="padding:8px;">Trivial — increment page number</td></tr>
+                    <tr><td style="padding:8px;">Best for</td><td style="padding:8px;">Feeds, infinite scroll, sync jobs, mobile apps</td><td style="padding:8px;">Admin dashboards, reports, bounded lists</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Parameter design conventions</h3>
+            <pre><code>GET /orders?status=paid&amp;created_after=2026-01-01T00:00:00Z&amp;sort=-created_at,id&amp;limit=100&amp;cursor=eyJpZCI6IDEwNDJ9
+
+Conventions worth standardizing across every endpoint:
+- limit     : server-enforced default (50) and hard cap (1000). Never unbounded.
+- sort      : "-" prefix = descending. ALWAYS append a unique tiebreaker column
+              ("created_at,id") — unstable sorts corrupt cursors.
+- cursor    : base64(JSON({ last_seen: { created_at, id } })). Sign it if the
+              contents are user-visible; treat it as opaque either way.
+- filters   : exact-match params named after fields; ranges via _after/_before;
+              multiple values as repeated params (?status=open&amp;status=paid).</code></pre>
+
+            <pre><code>{
+  "data": [
+    { "id": "ord_1042", "status": "paid", "total": 4900 },
+    ...
+  ],
+  "pagination": {
+    "next_cursor": "eyJpZCI6IDEwNTF9",
+    "has_more": true,
+    "limit": 100
+  }
+}</code></pre>
+
+            <p>Two implementation notes that save pain later: encode the cursor's sort columns in the token itself so a client can't pair a stale cursor with a different sort, and return <code>null</code> for <code>next_cursor</code> on the final page rather than omitting the key — explicit beats absent when clients write deserialization code.</p>
+        </section>
+
+        <section id="errors" class="container">
+            <h2>Error Responses: RFC 7807 problem+json</h2>
+            <p class="answer-block"><strong>Return one machine-readable error envelope for every failure — <code>application/problem+json</code> (RFC 7807).</strong> Humans read the <code>detail</code> message; machines branch on the <code>type</code>/<code>code</code> field. Ad-hoc error shapes force every integrator to write bespoke parsing for your API alone.</p>
+
+            <pre><code>HTTP/1.1 422 Unprocessable Entity
+Content-Type: application/problem+json
+X-Request-ID: req_9f2ab71c
+
+{
+  "type": "https://api.example.com/errors/insufficient-inventory",
+  "title": "Insufficient inventory",
+  "status": 422,
+  "detail": "Requested 12 units of SKU 'A-1042', but only 3 are available.",
+  "instance": "/orders",
+  "code": "INSUFFICIENT_INVENTORY",
+  "request_id": "req_9f2ab71c",
+  "errors": [
+    { "field": "items[0].sku",       "value": "A-1042" },
+    { "field": "items[0].quantity",  "issue": "exceeds_available_stock", "available": 3 }
+  ]
+}</code></pre>
+
+            <p>The <code>type</code> URI doubles as documentation: serve a human-readable page there explaining the error, common causes, and how to fix it. It costs nothing and cuts support volume measurably.</p>
+
+            <h3>Error code taxonomy</h3>
+            <table style="width:100%; border-collapse:collapse; margin:16px 0; color:#cbd5e1; font-size:14px;">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--border);">
+                        <th style="text-align:left; padding:8px;">HTTP</th>
+                        <th style="text-align:left; padding:8px;">code</th>
+                        <th style="text-align:left; padding:8px;">When</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">400</td><td style="padding:8px;">VALIDATION_ERROR</td><td style="padding:8px;">Malformed JSON, wrong types, missing required fields</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">401</td><td style="padding:8px;">UNAUTHENTICATED</td><td style="padding:8px;">Missing, malformed, or expired credentials</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">403</td><td style="padding:8px;">FORBIDDEN</td><td style="padding:8px;">Authenticated but lacking scope/permission for this action</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">404</td><td style="padding:8px;">NOT_FOUND</td><td style="padding:8px;">Resource doesn't exist or existence is hidden from this caller</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">409</td><td style="padding:8px;">CONFLICT</td><td style="padding:8px;">Duplicate unique key, concurrent modification, illegal state transition</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">422</td><td style="padding:8px;">UNPROCESSABLE_ENTITY</td><td style="padding:8px;">Well-formed request that violates business rules</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">429</td><td style="padding:8px;">RATE_LIMITED</td><td style="padding:8px;">Quota exceeded — always paired with Retry-After</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">500</td><td style="padding:8px;">INTERNAL_ERROR</td><td style="padding:8px;">Your bug. Generic message + request_id; specifics go to logs only</td></tr>
+                    <tr><td style="padding:8px;">503</td><td style="padding:8px;">SERVICE_UNAVAILABLE</td><td style="padding:8px;">Planned maintenance or upstream dependency down</td></tr>
+                </tbody>
+            </table>
+
+            <p>Three rules that prevent the worst incidents: never echo stack traces, SQL fragments, or library names in error bodies (they're reconnaissance gifts); echo a <code>X-Request-ID</code> back on every response so a single ID correlates the client report, your gateway logs, and your service traces; and distinguish "client sent garbage" (400) from "client sent something we understand but won't act on" (422) consistently — mixed usage trains integrators to ignore your codes.</p>
+        </section>
+
+        <section id="rate-limiting" class="container">
+            <h2>Rate Limiting: Headers, Strategies, and 429 Handling</h2>
+            <p class="answer-block"><strong>Rate-limit every public endpoint and advertise the current budget in response headers on every request — not just when the client exceeds it.</strong> Well-behaved clients self-throttle when they can see <code>RateLimit-Remaining</code>; everyone else gets a clean 429 with <code>Retry-After</code> instead of a cascade of timeouts.</p>
+
+            <pre><code>// Every successful response (IETF draft-distributed-rate-limiting style,
+// plus legacy X- headers most SDKs still parse):
+RateLimit-Limit: 600              // requests allowed in the window
+RateLimit-Remaining: 437          // left in the current window
+RateLimit-Reset: 28               // seconds until the window resets
+RateLimit-Policy: 600;w=60        // optional: policy disclosure
+
+// On 429 only — the single most important header:
+Retry-After: 28                   // seconds (or HTTP-date)
+
+// Legacy but still expected by many clients:
+X-RateLimit-Limit: 600
+X-RateLimit-Remaining: 437
+X-RateLimit-Reset: 1756128000     // epoch seconds</code></pre>
+
+            <h3>Choosing an algorithm</h3>
+            <ul>
+                <li><strong>Token bucket:</strong> bucket capacity N, refill r tokens/second. Tolerates short bursts up to N while enforcing a sustained rate of r/sec. The right default for most APIs (Stripe uses this shape).</li>
+                <li><strong>Sliding window counter:</strong> weighted blend of the previous and current fixed windows. Strict fairness, no burst allowance, cheap to compute with Redis — good for shared infrastructure quotas.</li>
+                <li><strong>Fixed window:</strong> a counter reset each minute. Simplest possible, but permits a 2x burst at window boundaries (59 requests at 00:00:59 + 59 at 00:01:00). Acceptable for coarse daily/monthly quotas; not for per-second abuse control.</li>
+            </ul>
+
+            <p>Key limits by API key first, fall back to IP for unauthenticated traffic. Apply per-endpoint weights so one expensive report-generation call doesn't consume the same quota as one health check. Store counters in Redis with atomic <code>INCR</code>/<code>EXPIRE</code> — checking-and-decrementing in application memory breaks the moment you run two instances.</p>
+
+            <h3>What a proper 429 looks like</h3>
+            <pre><code>HTTP/1.1 429 Too Many Requests
+Retry-After: 28
+RateLimit-Remaining: 0
+Content-Type: application/problem+json
+
+{ "type": "https://api.example.com/errors/rate-limited",
+  "title": "Rate limit exceeded",
+  "status": 429,
+  "detail": "600 requests per 60 seconds exceeded. Retry after 28 seconds." }</code></pre>
+
+            <p>On the client side, the correct consumption pattern is: respect <code>Retry-After</code> exactly when present; otherwise exponential backoff with jitter (base 500ms, factor 2, cap 30s) — jitter is non-negotiable, because synchronized retries from many clients re-create the thundering herd you were throttled to avoid.</p>
+        </section>
+
+        <section id="idempotency-keys" class="container">
+            <h2>Idempotency Keys: Making Retries Safe</h2>
+            <p class="answer-block"><strong>Require an <code>Idempotency-Key</code> header on every POST that creates money movement or other critical side effects. Store the key with a request fingerprint and the final response, then replay the stored response on retry instead of executing twice.</strong> Networks retry; payment processors double-charge when you're not prepared.</p>
+
+            <pre><code>// Express middleware sketch
+async function idempotency(req, res, next) {
+  if (req.method !== "POST") return next();
+  const key = req.get("Idempotency-Key");
+  if (!key) return res.status(400).json(problem("MISSING_IDEMPOTENCY_KEY"));
+
+  const fingerprint = sha256(`${req.method}|${req.originalUrl}|${rawBody}`);
+
+  const existing = await db.idempotency_keys.find(key);
+  if (existing) {
+    if (existing.fingerprint !== fingerprint)
+      return res.status(422).json(problem(
+        "IDEMPOTENCY_KEY_REUSED",
+        "This key was already used with a different request body."));
+    if (!existing.completed)
+      return res.status(409).json(problem(
+        "REQUEST_IN_FLIGHT",
+        "Original request still processing; retry shortly."));
+    return res.status(existing.status).json(existing.body);  // replay
+  }
+
+  await db.idempotency_keys.insert({ key, fingerprint, completed: false }); // claim
+  res.locals.idempotency_key = key;
+  next();
+}
+
+// After the handler resolves, persist { key -> {status, body}, completed: true }.
+</code></pre>
+
+            <pre><code>curl -X POST https://api.example.com/payments \
+  -H "Authorization: Bearer sk_live_..." \
+  -H "Idempotency-Key: 8f3c1e2a-7b44-4c9d-a1f2-5e6d8a90b3c1" \
+  -H "Content-Type: application/json" \
+  -d '{"amount": 4900, "currency": "usd", "customer": "cus_1042"}'</code></pre>
+
+            <h3>Implementation rules</h3>
+            <ul>
+                <li><strong>Scope keys per endpoint:</strong> uniqueness is (route, key), not global — two different operations can legitimately reuse a client-generated UUID.</li>
+                <li><strong>Set a TTL:</strong> 24 hours is standard; purge expired rows so the table doesn't grow forever.</li>
+                <li><strong>Fingerprint the request:</strong> reusing a key with a different body must fail loudly (422). Silent acceptance hides real client bugs.</li>
+                <li><strong>Handle concurrency:</strong> two simultaneous requests with the same key — one wins the claim, the other gets 409 REQUEST_IN_FLIGHT. Use a unique constraint on the key row, not application-level checks alone.</li>
+                <li><strong>Make the database idempotent anyway:</strong> unique constraints on natural keys (order number, charge reference) protect you after the key expires or when a caller forgets to send one. Keys are a convenience layer; constraints are the guarantee.</li>
+                <li><strong>Return identical responses on replay,</strong> including the original status code — a retry that returns 201 again is what lets naive clients sleep at night.</li>
+            </ul>
+        </section>
+
+        <section id="security" class="container">
+            <h2>Security Essentials</h2>
+            <p class="answer-block"><strong>Authenticate every request with short-lived bearer tokens, authorize per-scope with deny-by-default, validate input against a schema at the boundary, and whitelist writable fields to prevent mass assignment.</strong> Most API breaches trace back to one of those four controls being missing — not to exotic cryptography failures.</p>
+
+            <h3>Authentication &amp; authorization</h3>
+            <ul>
+                <li><strong>TLS everywhere, no exceptions;</strong> add HSTS once you're sure. Tokens in the <code>Authorization</code> header, never query strings — URLs end up in access logs, browser history, and referrer headers.</li>
+                <li><strong>OAuth 2.0 flows by actor:</strong> authorization code + PKCE for user-facing apps, client credentials for machine-to-machine. JWTs short-lived (15 minutes or less) with rotating refresh tokens and server-side revocation for logout/compromise.</li>
+                <li><strong>Scopes checked per route</strong> in middleware (<code>orders:write</code>, not just <code>authenticated</code>); log every denial with actor and scope gap for audit.</li>
+                <li><strong>Object-level checks, not just route-level:</strong> verifying a valid token isn't enough — verify the token's owner owns <em>this</em> order ID. Broken object-level authorization (BOLA) is the #1 API vulnerability in OWASP's API Top 10.</li>
+            </ul>
+
+            <h3>Mass assignment protection</h3>
+            <pre><code>// Vulnerable — the client controls which fields are written:
+const user = await User.update(req.params.id, req.body);
+// Attacker POSTs: { "bio": "hi", "role": "admin", "planTier": "enterprise" }
+
+// Safe — explicit allowlist per endpoint:
+const WRITABLE = ["displayName", "bio", "timezone"];
+const patch = pick(req.body, ...WRITABLE);
+const user = await User.update(req.params.id, patch);
+// Privileged fields change only through dedicated admin endpoints,
+// behind admin scopes, with audit logging.</code></pre>
+
+            <h3>Input validation &amp; hygiene</h3>
+            <ul>
+                <li>Validate bodies and query params against a schema at the edge (Zod, Joi, JSON Schema); reject unknown fields explicitly rather than silently ignoring them — silent ignoring turns typos into mystery behavior (<code>?limt=10</code>). Parameterized queries everywhere; ORM raw-query escapes reviewed like production code, because they are.</li>
+                <li>CORS: explicit origin allowlist. Reflecting the <code>Origin</code> header back with <code>Access-Control-Allow-Origin</code> defeats the entire mechanism while looking configured.</li>
+                <li>Enforce request body size limits at the gateway (1–10MB typical ceiling) — unbounded parsing is a memory-exhaustion DoS vector.</li>
+                <li>Audit-log privileged mutations with actor, timestamp, and before/after diff. Your incident postmortem depends on it.</li>
+            </ul>
+        </section>
+
+        <section id="anti-patterns" class="container">
+            <h2>Anti-Patterns Catalog</h2>
+            <p class="answer-block"><strong>Ten mistakes account for most of the production API incidents and integrator complaints worth writing down.</strong> Each has a mechanical fix — none require a rewrite if you catch them early.</p>
+
+            <table style="width:100%; border-collapse:collapse; margin:16px 0; color:#cbd5e1; font-size:14px;">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--border);">
+                        <th style="text-align:left; padding:8px;">Anti-Pattern</th>
+                        <th style="text-align:left; padding:8px;">Why It Hurts</th>
+                        <th style="text-align:left; padding:8px;">Fix</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Verbs in URLs (<code>POST /getUser</code>)</td><td style="padding:8px;">Two conventions collide; HTTP caching and tooling become useless</td><td style="padding:8px;">Resources + methods; actions as state transitions</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Always-200 envelopes</td><td style="padding:8px;">Breaks retries, monitoring, caching, gateway policies</td><td style="padding:8px;">Correct status codes; envelope only for metadata</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Unbounded list endpoints</td><td style="padding:8px;">One <code>/orders</code> call with no limit takes down the DB at scale</td><td style="padding:8px;">Default limit=50, hard cap=1000, cursor pagination</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">"Just added a field" shipped as breaking</td><td style="padding:8px;">Removing/renaming/requiring breaks silent clients in production</td><td style="padding:8px;">Additive-only within a version; version bump on any break</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Stack traces / SQL in error bodies</td><td style="padding:8px;">Free reconnaissance: schema, versions, file paths exposed</td><td style="padding:8px;">RFC 7807 + request_id; details go to server logs</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Chatty N+1 APIs</td><td style="padding:8px;">Mobile clients make 50 calls to render one screen; latency explodes</td><td style="padding:8px;"><code>?include=customer</code> embedding or batch endpoints</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Undocumented magic values (<code>type=3</code>)</td><td style="padding:8px;">Integrators guess, guess wrong, file tickets</td><td style="padding:8px;">Named enums documented in the schema</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">No ETag / If-Match on mutable resources</td><td style="padding:8px;">Lost updates under concurrency; two support agents overwrite each other</td><td style="padding:8px;">ETag + optimistic locking; 409/412 on stale writes</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Tokens in query strings</td><td style="padding:8px;">Leaked via access logs, proxies, referrers, shared links</td><td style="padding:8px;"><code>Authorization</code> header only</td></tr>
+                    <tr><td style="padding:8px;">Naive timestamps ("2026-08-25")</td><td style="padding:8px;">Timezone off-by-hours bugs surface months later in billing</td><td style="padding:8px;">ISO 8601 UTC everywhere, e.g. <code>2026-08-25T14:30:00Z</code></td></tr>
+                </tbody>
+            </table>
+
+            <h3>The meta-pattern</h3>
+            <p>Nearly every entry above is the same failure: optimizing for the happy path today instead of the retry path tomorrow. Status codes, idempotency keys, cursors, and version discipline all exist because networks partition, clients time out, and data changes mid-scroll. Design for the second attempt first — the first one usually takes care of itself.</p>
+        </section>
+
+        <section class="container guide-cta">
+            <h2>Continue Learning</h2>
+            <p>Go deeper with the companion guides on system architecture, database scaling, and the backend roadmap.</p>
+            <div class="hero-buttons">
+                <a href="../backend-architecture-patterns/" class="btn btn-primary">Backend Architecture Patterns →</a>
+                <a href="../backend-developer-roadmap/" class="btn btn-secondary">Backend Developer Roadmap →</a>
+                <a href="../../index.html#contact" class="btn btn-secondary">Get In Touch →</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Amit Kumar. <a href="../../index.html">← Back to Portfolio</a></p>
+        </div>
+    </footer>
+    <script src="../../script.js"></script>
+</body>
+</html>

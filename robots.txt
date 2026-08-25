@@ -1,4 +1,11 @@
 User-agent: *
 Allow: /
 
+# Crawl-delay for polite crawling
+Crawl-delay: 10
+
+# Sitemap
 Sitemap: https://amitk.pages.dev/sitemap.xml
+
+# Host directive (optional, for Yandex)
+Host: https://amitk.pages.dev

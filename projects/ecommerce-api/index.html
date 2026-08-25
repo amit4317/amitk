@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G2K98Y4CGE"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-G2K98Y4CGE');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="alternate" hreflang="en" href="https://amitk.pages.dev/projects/ecommerce-api/" />
+    <link rel="alternate" hreflang="x-default" href="https://amitk.pages.dev/projects/ecommerce-api/" />
+    <title>E-Commerce API Case Study — Node.js, Express, MongoDB | Amit Kumar</title>
+    <meta name="description" content="Case study: High-performance e-commerce REST API handling 10K+ RPS with sub-100ms p99 latency. Node.js, Express, MongoDB. JWT auth, idempotent orders, real-time inventory.">
+    <link rel="canonical" href="https://amitk.pages.dev/projects/ecommerce-api/">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="E-Commerce API Case Study — 10K RPS, Sub-100ms Latency">
+    <meta property="og:description" content="Node.js/Express/MongoDB e-commerce backend with JWT auth, idempotent checkout, real-time inventory. Architecture decisions and metrics.">
+    <meta property="og:url" content="https://amitk.pages.dev/projects/ecommerce-api/">
+    <meta property="og:image" content="https://amitk.pages.dev/amit_kumar_backend_developer.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="E-Commerce API Case Study — 10K RPS, Sub-100ms Latency">
+    <meta name="twitter:description" content="Node.js/Express/MongoDB e-commerce backend. Architecture decisions, metrics, and lessons learned.">
+    <meta name="twitter:image" content="https://amitk.pages.dev/amit_kumar_backend_developer.png">
+    <link rel="icon" href="../../favicon.ico">
+    <link rel="stylesheet" href="../../styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://amitk.pages.dev/"},
+            {"@type": "ListItem", "position": 2, "name": "Projects", "item": "https://amitk.pages.dev/#projects"},
+            {"@type": "ListItem", "position": 3, "name": "E-Commerce API", "item": "https://amitk.pages.dev/projects/ecommerce-api/"}
+          ]
+        },
+        {
+          "@type": "TechArticle",
+          "headline": "E-Commerce API: Handling 10K RPS with Sub-100ms Latency",
+          "description": "Architecture deep-dive: Node.js, Express, MongoDB e-commerce backend with JWT authentication, idempotent order processing, and real-time inventory via aggregation pipelines.",
+          "datePublished": "2026-08-25",
+          "dateModified": "2026-08-25",
+          "author": {"@type": "Person", "name": "Amit Kumar", "url": "https://amitk.pages.dev/"},
+          "publisher": {"@type": "Person", "name": "Amit Kumar"},
+          "mainEntityOfPage": "https://amitk.pages.dev/projects/ecommerce-api/",
+          "image": "https://amitk.pages.dev/amit_kumar_backend_developer.png",
+          "keywords": ["Node.js", "Express", "MongoDB", "REST API", "E-commerce", "System Design", "Performance Optimization"]
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "E-Commerce API",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Linux",
+          "description": "High-performance REST API for e-commerce with user authentication, product catalog, cart/checkout, and order processing.",
+          "url": "https://amitk.pages.dev/projects/ecommerce-api/",
+          "author": {"@type": "Person", "name": "Amit Kumar"},
+          "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}
+        }
+      ]
+    }
+    </script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo"><a href="../../index.html"><h2>AK</h2></a></div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="../../index.html" class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="../../index.html#about" class="nav-link">About</a></li>
+                <li class="nav-item"><a href="../../index.html#projects" class="nav-link">Projects</a></li>
+                <li class="nav-item"><a href="../../docgen-studio/" class="nav-link nav-featured">DocGen <span class="nav-new">New</span></a></li>
+                <li class="nav-item"><a href="../../index.html#contact" class="nav-link">Contact</a></li>
+            </ul>
+            <div class="hamburger" aria-label="Toggle navigation"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+        </div>
+    </nav>
+
+    <main class="guide-main">
+        <header class="guide-hero container">
+            <p class="product-kicker">Case Study · E-Commerce Backend</p>
+            <h1>E-Commerce API: 10K RPS, Sub-100ms p99</h1>
+            <p class="answer-block" id="answer"><strong>A production-grade REST API handling 10,000+ requests per second with sub-100ms p99 latency.</strong> Built with Node.js, Express, and MongoDB. Features JWT authentication, product catalog with variants, idempotent checkout, and real-time inventory using MongoDB aggregation pipelines.</p>
+            <p class="guide-meta">Tech: Node.js · Express · MongoDB · Redis · Docker · AWS · ~3 weeks</p>
+        </header>
+
+        <nav class="jump-nav container" aria-label="Case study sections">
+            <a href="#architecture">Architecture</a>
+            <a href="#auth">Authentication</a>
+            <a href="#catalog">Product Catalog</a>
+            <a href="#checkout">Checkout & Orders</a>
+            <a href="#inventory">Real-time Inventory</a>
+            <a href="#performance">Performance</a>
+            <a href="#decisions">Key Decisions</a>
+            <a href="#lessons">Lessons Learned</a>
+        </nav>
+
+        <section id="architecture" class="container">
+            <h2>System Architecture</h2>
+            <p class="answer-block"><strong>Stateless API layer behind a load balancer, with MongoDB for primary data and Redis for caching/sessions.</strong> Horizontal scaling via container orchestration. Database reads routed to replica set secondaries for read-heavy endpoints (product listings).</p>
+            
+            <h3>High-level components</h3>
+            <ul>
+                <li><strong>API Gateway / Load Balancer:</strong> AWS ALB distributing across ECS Fargate tasks</li>
+                <li><strong>Application Layer:</strong> 3+ Node.js/Express containers (stateless, horizontal scaling)</li>
+                <li><strong>Primary Database:</strong> MongoDB 3-node replica set (1 primary, 2 secondaries)</li>
+                <li><strong>Cache/Session Store:</strong> Redis Cluster (ElastiCache) for JWT blacklisting, rate limiting, product catalog caching</li>
+                <li><strong>Message Queue:</strong> SQS for async order confirmation emails, inventory webhooks</li>
+            </ul>
+
+            <h3>Request flow (simplified)</h3>
+            <ol>
+                <li>Client → ALB → Express app</li>
+                <li>Auth middleware validates JWT (Redis check for revocation)</li>
+                <li>Route handler executes business logic</li>
+                <li>Reads: MongoDB secondary (eventually consistent) | Writes: MongoDB primary</li>
+                <li>Response → Client (with caching headers where appropriate)</li>
+            </ol>
+        </section>
+
+        <section id="auth" class="container">
+            <h2>Authentication & Authorization</h2>
+            <p class="answer-block"><strong>Stateless JWT with short-lived access tokens (15 min) and refresh tokens (7 days) stored in HttpOnly cookies.</strong> Token revocation via Redis blacklist for immediate logout/security events.</p>
+
+            <h3>Implementation details</h3>
+            <ul>
+                <li><strong>Access Token:</strong> RS256 signed, 15-min expiry, contains user ID, roles, permissions</li>
+                <li><strong>Refresh Token:</strong> Opaque token stored in Redis with 7-day TTL, rotated on each use</li>
+                <li><strong>Password Hashing:</strong> Argon2id (memory-hard, resistant to GPU attacks)</li>
+                <li><strong>Rate Limiting:</strong> 10 req/min on auth endpoints, 100 req/min general (Redis sliding window)</li>
+                <li><strong>Security Headers:</strong> Helmet.js for CSP, HSTS, X-Frame-Options, Referrer-Policy</li>
+            </ul>
+
+            <h3>Why not sessions?</h3>
+            <p>JWT enables stateless horizontal scaling — no sticky sessions, no shared session store latency. Refresh token rotation mitigates token theft risk.</p>
+        </section>
+
+        <section id="catalog" class="container">
+            <h2>Product Catalog & Variants</h2>
+            <p class="answer-block"><strong>Flexible document model in MongoDB supporting unlimited product variants (size, color, material) without schema migrations.</strong> Embedded variants for read performance; separate collection for category/facet indexing.</p>
+
+            <h3>Data model highlights</h3>
+            <pre><code>// Product document (simplified)
+{
+  _id: ObjectId,
+  slug: "organic-cotton-tee",
+  name: "Organic Cotton T-Shirt",
+  basePrice: 29.99,
+  currency: "USD",
+  variants: [
+    { sku: "OCT-S-BLK", attrs: { size: "S", color: "Black" }, stock: 42, priceDelta: 0 },
+    { sku: "OCT-M-BLU", attrs: { size: "M", color: "Blue" }, stock: 18, priceDelta: 2.00 }
+  ],
+  categories: ["apparel", "organic", "t-shirts"],
+  searchableText: "organic cotton t-shirt black blue small medium...", // for text index
+  createdAt, updatedAt
+}</code></pre>
+
+            <h3>Query patterns optimized</h3>
+            <ul>
+                <li><strong>List with filters:</strong> Compound index on <code>{categories: 1, "variants.attrs.size": 1, "variants.attrs.color": 1, basePrice: 1}</code></li>
+                <li><strong>Search:</strong> Text index on <code>searchableText</code> with weights</li>
+                <li><strong>Single product:</strong> Direct <code>_id</code> or <code>slug</code> lookup (cached in Redis 1hr)</li>
+            </ul>
+        </section>
+
+        <section id="checkout" class="container">
+            <h2>Checkout & Idempotent Order Processing</h2>
+            <p class="answer-block"><strong>Idempotency keys on every mutating endpoint prevent duplicate orders from network retries.</strong> Client generates UUID v4 per checkout attempt; server stores key + response for 24 hours.</p>
+
+            <h3>Order flow</h3>
+            <ol>
+                <li>Client POST <code>/orders</code> with <code>Idempotency-Key</code> header</li>
+                <li>Server checks Redis for existing key → returns cached response if found</li>
+                <li>Validate cart, reserve inventory (atomic <code>findOneAndUpdate</code> with <code>$inc</code> on variant stock)</li>
+                <li>Create order document with <code>PENDING</code> status</li>
+                <li>Publish <code>OrderCreated</code> event to SQS (payment, email, inventory webhook)</li>
+                <li>Return order ID + idempotency key to client</li>
+            </ol>
+
+            <h3>Why idempotency matters</h3>
+            <p>Mobile networks, browser retries, and payment provider timeouts cause duplicate requests. Without idempotency: double charges, duplicate fulfillment, inventory corruption. With it: exactly-once semantics at application level.</p>
+        </section>
+
+        <section id="inventory" class="container">
+            <h2>Real-time Inventory with Aggregation Pipelines</h2>
+            <p class="answer-block"><strong>MongoDB aggregation pipelines compute available stock in real-time across variants, reservations, and pending orders.</strong> No separate inventory service needed; single source of truth in MongoDB.</p>
+
+            <h3>Available stock calculation (simplified)</h3>
+            <pre><code>db.products.aggregate([
+  { $match: { _id: productId } },
+  { $unwind: "$variants" },
+  { $lookup: {
+      from: "orders",
+      localField: "variants.sku",
+      foreignField: "items.sku",
+      pipeline: [
+        { $match: { status: { $in: ["PENDING", "CONFIRMED", "PROCESSING"] } } },
+        { $group: { _id: "$items.sku", reserved: { $sum: "$items.qty" } } }
+      ],
+      as: "reservations"
+  }},
+  { $addFields: {
+      available: { $subtract: ["$variants.stock", { $ifNull: [{ $sum: "$reservations.reserved" }, 0] }] }
+  }},
+  { $project: { sku: "$variants.sku", available: 1, attrs: "$variants.attrs" } }
+])</code></pre>
+
+            <p>Cached in Redis for 30 seconds on product detail pages. Cache invalidated on order creation via pub/sub.</p>
+        </section>
+
+        <section id="performance" class="container">
+            <h2>Performance Metrics & Optimization</h2>
+            <p class="answer-block"><strong>Load test results (k6, 5-min sustained): 10,200 RPS, p50=28ms, p95=67ms, p99=94ms, error rate <0.01%.</strong> Cost: ~$180/month on AWS (3x Fargate, MongoDB Atlas M30, ElastiCache cache.t3.micro).</p>
+
+            <table style="width:100%; border-collapse:collapse; margin:16px 0; color:#cbd5e1;">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--border);">
+                        <th style="text-align:left; padding:8px;">Metric</th>
+                        <th style="text-align:left; padding:8px;">Target</th>
+                        <th style="text-align:left; padding:8px;">Achieved</th>
+                        <th style="text-align:left; padding:8px;">Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Throughput</td><td style="padding:8px;">>10K RPS</td><td style="padding:8px;">10.2K RPS</td><td style="padding:8px;">Sustained 5 min</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">p50 Latency</td><td style="padding:8px;"><50ms</td><td style="padding:8px;">28ms</td><td style="padding:8px;">Read-heavy endpoints</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">p99 Latency</td><td style="padding:8px;"><100ms</td><td style="padding:8px;">94ms</td><td style="padding:8px;">Includes writes</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Error Rate</td><td style="padding:8px;"><0.1%</td><td style="padding:8px;">0.008%</td><td style="padding:8px;">Mostly validation errors</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">CPU Utilization</td><td style="padding:8px;"><70%</td><td style="padding:8px;">58%</td><td style="padding:8px;">Headroom for spikes</td></tr>
+                    <tr><td style="padding:8px;">Monthly Cost</td><td style="padding:8px;"><$200</td><td style="padding:8px;">$180</td><td style="padding:8px;">AWS us-east-1</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Key optimizations</h3>
+            <ul>
+                <li><strong>Connection pooling:</strong> MongoDB driver pool (min 10, max 100), Redis cluster client</li>
+                <li><strong>Query projection:</strong> Only fetch required fields (e.g., list view excludes descriptions)</li>
+                <li><strong>Redis caching:</strong> Product details (1hr), category trees (24hr), user sessions</li>
+                <li><strong>Compression:</strong> Brotli via ALB, response payloads <10KB typical</li>
+                <li><strong>Indexes:</strong> Compound indexes matching query patterns; regular <code>explain()</code> reviews</li>
+            </ul>
+        </section>
+
+        <section id="decisions" class="container">
+            <h2>Key Architecture Decisions (ADRs)</h2>
+            
+            <article class="feature-block">
+                <h3>ADR-001: Node.js over Go/Java for API layer</h3>
+                <p><strong>Decision:</strong> Node.js/Express for primary API. <strong>Context:</strong> Team expertise, npm ecosystem for auth/validation, fast iteration. <strong>Trade-off:</strong> Higher CPU/memory per request vs Go; mitigated by horizontal scaling and low absolute cost at this scale.</p>
+            </article>
+
+            <article class="feature-block">
+                <h3>ADR-002: MongoDB over PostgreSQL for product catalog</h3>
+                <p><strong>Decision:</strong> MongoDB for flexible variant schema. <strong>Context:</strong> Frequent schema changes (new variant attributes), hierarchical categories, no complex joins needed. <strong>Trade-off:</strong> No ACID transactions across collections; order processing uses application-level compensation.</p>
+            </article>
+
+            <article class="feature-block">
+                <h3>ADR-003: Eventual consistency for reads</h3>
+                <p><strong>Decision:</strong> Read from MongoDB secondaries. <strong>Context:</strong> Product listings tolerate 100-200ms staleness. <strong>Trade-off:</strong> Users might see briefly stale stock counts; mitigated by real-time validation at checkout.</p>
+            </article>
+
+            <article class="feature-block">
+                <h3>ADR-004: Redis for rate limiting vs in-memory</h3>
+                <p><strong>Decision:</strong> Redis sliding window. <strong>Context:</strong> Multi-instance deployment requires shared state. <strong>Trade-off:</strong> Added latency (~1ms) vs correctness under load.</p>
+            </article>
+        </section>
+
+        <section id="lessons" class="container">
+            <h2>Lessons Learned</h2>
+            <ul>
+                <li><strong>Start with idempotency:</strong> Retrofitting idempotency keys is painful. Design it in from day one for any mutating endpoint.</li>
+                <li><strong>Monitor p99, not average:</strong> Average latency hides tail latency spikes that degrade UX. Alert on p99 > 200ms.</li>
+                <li><strong>Cache invalidation is hard:</strong> Use short TTLs (30-60s) for critical data; accept eventual consistency for non-critical.</li>
+                <li><strong>MongoDB aggregations are powerful:</strong> Replaced a separate inventory service with a single pipeline. Less code, fewer failure points.</li>
+                <li><strong>Load test early:</strong> Found connection pool exhaustion at 3K RPS before production. Fixed by tuning pool sizes and ALB idle timeout.</li>
+            </ul>
+        </section>
+
+        <section class="container guide-cta">
+            <h2>Explore More</h2>
+            <p>View other backend case studies or get in touch to discuss your project.</p>
+            <div class="hero-buttons">
+                <a href="../social-media-backend/" class="btn btn-primary">Social Media Backend →</a>
+                <a href="../analytics-dashboard-api/" class="btn btn-secondary">Analytics Dashboard API →</a>
+                <a href="../../index.html#contact" class="btn btn-secondary">Hire Me</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Amit Kumar. <a href="../../index.html">← Back to Portfolio</a></p>
+        </div>
+    </footer>
+    <script src="../../script.js"></script>
+</body>
+</html>

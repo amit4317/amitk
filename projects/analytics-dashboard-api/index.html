@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G2K98Y4CGE"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-G2K98Y4CGE');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="alternate" hreflang="en" href="https://amitk.pages.dev/projects/analytics-dashboard-api/" />
+    <link rel="alternate" hreflang="x-default" href="https://amitk.pages.dev/projects/analytics-dashboard-api/" />
+    <title>Analytics Dashboard API Case Study — Spring Boot, Kafka, MySQL | Amit Kumar</title>
+    <meta name="description" content="Case study: High-throughput analytics API processing 1M+ events/day with <5s end-to-end latency. Spring Boot, Kafka, MySQL, Redis. Event ingestion, dimensional modeling, pre-aggregated metrics.">
+    <link rel="canonical" href="https://amitk.pages.dev/projects/analytics-dashboard-api/">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Analytics Dashboard API — 1M Events/Day, <5s Latency">
+    <meta property="og:description" content="Spring Boot/Kafka/MySQL analytics backend. Event ingestion pipeline, dimensional modeling, pre-aggregated Redis metrics. Architecture decisions and scale metrics.">
+    <meta property="og:url" content="https://amitk.pages.dev/projects/analytics-dashboard-api/">
+    <meta property="og:image" content="https://amitk.pages.dev/amit_kumar_backend_developer.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Analytics Dashboard API — 1M Events/Day, <5s Latency">
+    <meta name="twitter:description" content="Spring Boot, Kafka, MySQL, Redis. Event ingestion, dimensional modeling, pre-aggregated metrics.">
+    <meta name="twitter:image" content="https://amitk.pages.dev/amit_kumar_backend_developer.png">
+    <link rel="icon" href="../../favicon.ico">
+    <link rel="stylesheet" href="../../styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://amitk.pages.dev/"},
+            {"@type": "ListItem", "position": 2, "name": "Projects", "item": "https://amitk.pages.dev/#projects"},
+            {"@type": "ListItem", "position": 3, "name": "Analytics Dashboard API", "item": "https://amitk.pages.dev/projects/analytics-dashboard-api/"}
+          ]
+        },
+        {
+          "@type": "TechArticle",
+          "headline": "Analytics Dashboard API: 1M Events/Day with Sub-5s Latency",
+          "description": "High-throughput analytics backend: Spring Boot, Kafka, MySQL, Redis. Event ingestion pipeline, dimensional modeling, pre-aggregated metrics for real-time dashboards.",
+          "datePublished": "2026-08-25",
+          "dateModified": "2026-08-25",
+          "author": {"@type": "Person", "name": "Amit Kumar", "url": "https://amitk.pages.dev/"},
+          "publisher": {"@type": "Person", "name": "Amit Kumar"},
+          "mainEntityOfPage": "https://amitk.pages.dev/projects/analytics-dashboard-api/",
+          "image": "https://amitk.pages.dev/amit_kumar_backend_developer.png",
+          "keywords": ["Spring Boot", "Kafka", "MySQL", "Redis", "Analytics", "Event Streaming", "Dimensional Modeling", "System Design"]
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "Analytics Dashboard API",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Linux",
+          "description": "Backend API for business analytics dashboard with data processing, reporting, and visualization endpoints.",
+          "url": "https://amitk.pages.dev/projects/analytics-dashboard-api/",
+          "author": {"@type": "Person", "name": "Amit Kumar"},
+          "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}
+        }
+      ]
+    }
+    </script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo"><a href="../../index.html"><h2>AK</h2></a></div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="../../index.html" class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="../../index.html#about" class="nav-link">About</a></li>
+                <li class="nav-item"><a href="../../index.html#projects" class="nav-link">Projects</a></li>
+                <li class="nav-item"><a href="../../docgen-studio/" class="nav-link nav-featured">DocGen <span class="nav-new">New</span></a></li>
+                <li class="nav-item"><a href="../../index.html#contact" class="nav-link">Contact</a></li>
+            </ul>
+            <div class="hamburger" aria-label="Toggle navigation"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+        </div>
+    </nav>
+
+    <main class="guide-main">
+        <header class="guide-hero container">
+            <p class="product-kicker">Case Study · Analytics Backend</p>
+            <h1>Analytics Dashboard API: 1M Events/Day, <5s Latency</h1>
+            <p class="answer-block" id="answer"><strong>A high-throughput analytics backend processing 1,000,000+ events per day with end-to-end latency under 5 seconds.</strong> Built with Spring Boot, Apache Kafka, MySQL, and Redis. Features event ingestion pipeline, dimensional modeling, pre-aggregated metrics, and configurable report builder with CSV/PDF export.</p>
+            <p class="guide-meta">Tech: Java · Spring Boot · Kafka · MySQL · Redis · ~5 weeks</p>
+        </header>
+
+        <nav class="jump-nav container" aria-label="Case study sections">
+            <a href="#architecture">Architecture</a>
+            <a href="#ingestion">Event Ingestion</a>
+            <a href="#modeling">Dimensional Modeling</a>
+            <a href="#aggregation">Pre-aggregation</a>
+            <a href="#api">Query API</a>
+            <a href="#scale">Scaling</a>
+            <a href="#decisions">Key Decisions</a>
+        </nav>
+
+        <section id="architecture" class="container">
+            <h2>System Architecture</h2>
+            <p class="answer-block"><strong>Lambda-lite architecture: real-time stream processing (Kafka → Spring Boot consumers → Redis) + batch correction (nightly Spark jobs → MySQL).</strong> Dashboard queries hit pre-aggregated Redis for sub-100ms response; ad-hoc analysis queries MySQL.</p>
+
+            <h3>Data flow</h3>
+            <ol>
+                <li><strong>Producers</strong> (mobile apps, web, IoT) → HTTP → Kafka <code>raw-events</code> topic</li>
+                <li><strong>Stream Consumers</strong> (Spring Boot) → validate, enrich, route to typed topics (<code>pageviews</code>, <code>clicks</code>, <code>purchases</code>)</li>
+                <li><strong>Aggregation Workers</strong> → tumbling/hopping windows → Redis (pre-aggregated metrics) + MySQL (fact tables)</li>
+                <li><strong>Dashboard API</strong> → Redis for real-time widgets, MySQL for historical/deep-dive</li>
+                <li><strong>Batch Correction</strong> (nightly) → Spark → recompute from raw → fix late-arriving data in MySQL</li>
+            </ol>
+        </section>
+
+        <section id="ingestion" class="container">
+            <h2>Event Ingestion Pipeline</h2>
+            <p class="answer-block"><strong>Kafka as the backbone: decouples producers from consumers, provides replayability, handles backpressure.</strong> Spring Boot consumers with exactly-once semantics via transactional producers.</p>
+
+            <h3>Event schema (Avro, Schema Registry)</h3>
+            <pre><code>{
+  "type": "record",
+  "name": "AnalyticsEvent",
+  "namespace": "com.amitk.analytics",
+  "fields": [
+    {"name": "eventId", "type": "string"},           // UUID v4
+    {"name": "eventType", "type": {"type": "enum", "name": "EventType", "symbols": ["PAGEVIEW", "CLICK", "PURCHASE", "SIGNUP"]}},
+    {"name": "timestamp", "type": {"type": "long", "logicalType": "timestamp-millis"}},
+    {"name": "userId", "type": ["null", "string"]},
+    {"name": "sessionId", "type": "string"},
+    {"name": "properties", "type": {"type": "map", "values": "string"}},  // Flexible key-value
+    {"name": "context", "type": {                    // Auto-captured
+      "type": "record", "name": "EventContext",
+      "fields": [
+        {"name": "ip", "type": "string"},
+        {"name": "userAgent", "type": "string"},
+        {"name": "referrer", "type": ["null", "string"]},
+        {"name": "geo", "type": ["null", {"type": "record", "name": "Geo", "fields": [
+          {"name": "country", "type": "string"},
+          {"name": "region", "type": "string"},
+          {"name": "city", "type": "string"}
+        ]}]}
+      ]
+    }}
+  ]
+}</code></pre>
+
+            <h3>Consumer config for exactly-once</h3>
+            <pre><code>@Configuration
+public class KafkaConsumerConfig {
+    @Bean
+    public KafkaConsumer<String, AnalyticsEvent> consumer() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "analytics-ingestion");
+        props.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed"); // Exactly-once
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 500);
+        return new KafkaConsumer<>(props);
+    }
+}</code></pre>
+        </section>
+
+        <section id="modeling" class="container">
+            <h2>Dimensional Modeling (Kimball)</h2>
+            <p class="answer-block"><strong>Star schema in MySQL: fact tables for events, dimension tables for users, sessions, pages, products, geography.</strong> Surrogate keys, slowly changing dimensions (SCD Type 2 for user attributes), conformed dimensions across fact tables.</p>
+
+            <h3>Schema overview</h3>
+            <pre><code>-- Fact table (partitioned by day)
+CREATE TABLE fact_events (
+    event_id        BIGINT UNSIGNED NOT NULL,
+    event_date      DATE NOT NULL,
+    event_hour      TINYINT UNSIGNED NOT NULL,
+    event_type_id   SMALLINT UNSIGNED NOT NULL,
+    user_id         BIGINT UNSIGNED,
+    session_id      BIGINT UNSIGNED NOT NULL,
+    page_id         BIGINT UNSIGNED,
+    product_id      BIGINT UNSIGNED,
+    geo_id          INT UNSIGNED,
+    device_type_id  TINYINT UNSIGNED,
+    revenue_usd     DECIMAL(10,2) DEFAULT 0,
+    -- Measures
+    event_count     BIGINT UNSIGNED DEFAULT 1,
+    PRIMARY KEY (event_date, event_id)
+) PARTITION BY RANGE COLUMNS(event_date) (
+    PARTITION p2026_01 VALUES LESS THAN ('2026-02-01'),
+    PARTITION p2026_02 VALUES LESS THAN ('2026-03-01'),
+    -- ... monthly partitions
+    PARTITION p_future VALUES LESS THAN MAXVALUE
+);
+
+-- Dimension: User (SCD Type 2)
+CREATE TABLE dim_user (
+    user_sk         BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id         VARCHAR(64) NOT NULL,          -- Natural key
+    email           VARCHAR(255),
+    signup_date     DATE,
+    plan_tier       ENUM('free', 'pro', 'enterprise'),
+    -- SCD fields
+    valid_from      DATETIME NOT NULL,
+    valid_to        DATETIME,
+    is_current      BOOLEAN NOT NULL DEFAULT TRUE
+);</code></pre>
+
+            <h3>Conformed dimensions</h3>
+            <p><code>dim_date</code>, <code>dim_geo</code>, <code>dim_device</code>, <code>dim_page</code>, <code>dim_product</code> shared across all fact tables. Enables drill-across (e.g., revenue by geo + device).</p>
+        </section>
+
+        <section id="aggregation" class="container">
+            <h2>Pre-aggregation in Redis</h2>
+            <p class="answer-block"><strong>Real-time dashboards need sub-100ms queries. Pre-compute metrics in Redis with TTL-based expiry.</strong> Spring Boot aggregation workers consume from typed Kafka topics, compute windowed aggregates, write to Redis hashes/sorted sets.</p>
+
+            <h3>Metrics computed</h3>
+            <ul>
+                <li><strong>Counters:</strong> Pageviews, unique visitors, sessions, conversions (per page/product/geo/device)</li>
+                <li><strong>Gauges:</strong> Active users (5-min window), current cart value, queue depths</li>
+                <li><strong>Histograms:</strong> Latency percentiles (p50, p95, p99) via HDR histogram approximation</li>
+                <li><strong>Funnels:</strong> Step conversion rates (view → click → purchase) per segment</li>
+            </ul>
+
+            <h3>Redis data structures</h3>
+            <pre><code># Counter: pageviews per page per minute
+HINCRBY "metrics:pageviews:2026-08-25:14:30" "page:/dashboard" 1
+EXPIRE "metrics:pageviews:2026-08-25:14:30" 86400  # 24hr TTL
+
+# Sorted set: top pages by views (last hour)
+ZINCRBY "top:pages:1h" 1 "page:/dashboard"
+ZREMRANGEBYRANK "top:pages:1h" 0 -101  # Keep top 100
+
+# HyperLogLog: unique visitors per day
+PFADD "uv:2026-08-25" "user_123" "user_456"
+PFCOUNT "uv:2026-08-25"  # ~100K users, <1% error</code></pre>
+
+            <h3>Query API reads from Redis</h3>
+            <p>Dashboard widgets fetch pre-computed metrics directly:</p>
+            <pre><code>@GetMapping("/api/v1/metrics/realtime")
+public Map<String, Object> realtimeMetrics(@RequestParam String widget) {
+    return switch (widget) {
+        case "active_users" -> redisOps.opsForValue().get("gauge:active_users:5m");
+        case "top_pages" -> redisOps.opsForZSet().reverseRangeWithScores("top:pages:1h", 0, 9);
+        case "conversion_funnel" -> redisOps.opsForHash().entries("funnel:purchase:1h");
+        default -> Map.of("error", "Unknown widget");
+    };
+}</code></pre>
+        </section>
+
+        <section id="api" class="container">
+            <h2>Dashboard Query API</h2>
+            <p class="answer-block"><strong>REST API serving two query paths: Redis (real-time, pre-aggregated) and MySQL (historical, ad-hoc).</strong> Unified response format; client unaware of source.</p>
+
+            <h3>Endpoints</h3>
+            <ul>
+                <li><code>GET /api/v1/metrics/realtime?widget=active_users</code> → Redis (sub-50ms)</li>
+                <li><code>GET /api/v1/metrics/historical?metric=pageviews&granularity=hour&from=2026-08-01&to=2026-08-25</code> → MySQL (partition pruning)</li>
+                <li><code>POST /api/v1/reports</code> → Async report generation (CSV/PDF) via Celery-equivalent (Spring Batch)</li>
+                <li><code>GET /api/v1/dimensions/{dimension}/values</code> → MySQL dimension tables (cached 1hr)</li>
+            </ul>
+
+            <h3>Report builder</h3>
+            <p>Users configure reports via UI: select metrics, dimensions, filters, date range. API validates against metadata registry, generates SQL with parameter binding, executes via read replica.</p>
+        </section>
+
+        <section id="scale" class="container">
+            <h2>Scaling Metrics</h2>
+            <p class="answer-block"><strong>Production load: 1.2M events/day peak, 15K events/sec burst, <5s end-to-end (producer → dashboard).</strong> Cost: ~$350/month (3x Kafka brokers, 4x Spring Boot, MySQL db.r6g.xlarge, ElastiCache r6g.xlarge).</p>
+
+            <table style="width:100%; border-collapse:collapse; margin:16px 0; color:#cbd5e1;">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--border);">
+                        <th style="text-align:left; padding:8px;">Metric</th>
+                        <th style="text-align:left; padding:8px;">Value</th>
+                        <th style="text-align:left; padding:8px;">Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Events/day (avg)</td><td style="padding:8px;">1.2M</td><td style="padding:8px;">Business hours 3x baseline</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Peak throughput</td><td style="padding:8px;">15K events/sec</td><td style="padding:8px;">Kafka handles burst</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">End-to-end latency</td><td style="padding:8px;"><5s (p95)</td><td style="padding:8px;">Producer → Redis metric</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Dashboard query (Redis)</td><td style="padding:8px;"><50ms p99</td><td style="padding:8px;">Pre-aggregated</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Dashboard query (MySQL)</td><td style="padding:8px;"><500ms p95</td><td style="padding:8px;">Partitioned, indexed</td></tr>
+                    <tr><td style="padding:8px;">Monthly cost</td><td style="padding:8px;">$350</td><td style="padding:8px;">AWS us-east-1</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="decisions" class="container">
+            <h2>Key Architecture Decisions</h2>
+
+            <article class="feature-block">
+                <h3>ADR-001: Kafka over direct HTTP for ingestion</h3>
+                <p><strong>Decision:</strong> Kafka as ingestion buffer. <strong>Context:</strong> Producer variability (mobile batching, network issues), need replay for schema evolution. <strong>Trade-off:</strong> Added latency (~100ms) and operational complexity. Worth it for durability and replay.</p>
+            </article>
+
+            <article class="feature-block">
+                <h3>ADR-002: Spring Boot over Node.js/Python for stream processing</h3>
+                <p><strong>Decision:</strong> JVM ecosystem for Kafka Streams / Spring Cloud Stream. <strong>Context:</strong> Exactly-once semantics, strong typing (Avro), team Java expertise. <strong>Trade-off:</strong> Higher memory baseline; longer startup. Mitigated by GraalVM native image for consumers.</p>
+            </article>
+
+            <article class="feature-block">
+                <h3>ADR-003: Redis for real-time, MySQL for historical</h3>
+                <p><strong>Decision:</strong> Dual-query-path architecture. <strong>Context:</strong> Dashboard UX demands speed; analysts need flexibility. <strong>Trade-off:</strong> Data duplication, eventual consistency (Redis TTL + nightly reconciliation). Acceptable for analytics.</p>
+            </article>
+
+            <article class="feature-block">
+                <h3>ADR-004: Dimensional modeling over wide tables</h3>
+                <p><strong>Decision:</strong> Kimball star schema. <strong>Context:</strong> BI tool compatibility, drill-across, conformed dimensions. <strong>Trade-off:</strong> More joins; MySQL handles well with proper indexes and partitioning.</p>
+            </article>
+        </section>
+
+        <section class="container guide-cta">
+            <h2>Explore More</h2>
+            <p>View other backend case studies or get in touch to discuss your project.</p>
+            <div class="hero-buttons">
+                <a href="../ecommerce-api/" class="btn btn-primary">E-Commerce API →</a>
+                <a href="../social-media-backend/" class="btn btn-secondary">Social Media Backend →</a>
+                <a href="../../index.html#contact" class="btn btn-secondary">Hire Me</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Amit Kumar. <a href="../../index.html">← Back to Portfolio</a></p>
+        </div>
+    </footer>
+    <script src="../../script.js"></script>
+</body>
+</html>
