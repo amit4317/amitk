@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G2K98Y4CGE"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-G2K98Y4CGE');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="alternate" hreflang="en" href="https://amitk.pages.dev/blog/backend-architecture-patterns/" />
+    <link rel="alternate" hreflang="x-default" href="https://amitk.pages.dev/blog/backend-architecture-patterns/" />
+    <title>Backend Architecture Patterns: When to Use What — A Practitioner's Guide | Amit Kumar</title>
+    <meta name="description" content="Practical guide to backend architecture patterns: Monolith vs Microservices, Event-Driven, CQRS, Saga, Circuit Breaker. Decision frameworks with real-world trade-offs from production experience.">
+    <link rel="canonical" href="https://amitk.pages.dev/blog/backend-architecture-patterns/">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Backend Architecture Patterns: When to Use What">
+    <meta property="og:description" content="Monolith vs Microservices, Event-Driven, CQRS, Saga, Circuit Breaker. Decision frameworks with real trade-offs from production.">
+    <meta property="og:url" content="https://amitk.pages.dev/blog/backend-architecture-patterns/">
+    <meta property="og:image" content="https://amitk.pages.dev/amit_kumar_backend_developer.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Backend Architecture Patterns: When to Use What">
+    <meta name="twitter:description" content="Practitioner's guide to backend patterns. Decision frameworks, not hype. Real trade-offs from production.">
+    <meta name="twitter:image" content="https://amitk.pages.dev/amit_kumar_backend_developer.png">
+    <link rel="icon" href="../../favicon.ico">
+    <link rel="stylesheet" href="../../styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://amitk.pages.dev/"},
+            {"@type": "ListItem", "position": 2, "name": "Blog", "item": "https://amitk.pages.dev/blog/"},
+            {"@type": "ListItem", "position": 3, "name": "Backend Architecture Patterns", "item": "https://amitk.pages.dev/blog/backend-architecture-patterns/"}
+          ]
+        },
+        {
+          "@type": "TechArticle",
+          "headline": "Backend Architecture Patterns: When to Use What — A Practitioner's Guide",
+          "description": "Decision frameworks for backend architecture: Monolith vs Microservices, Event-Driven, CQRS, Saga, Circuit Breaker. Real trade-offs from production experience at scale.",
+          "datePublished": "2026-08-25",
+          "dateModified": "2026-08-25",
+          "author": {"@type": "Person", "name": "Amit Kumar", "url": "https://amitk.pages.dev/"},
+          "publisher": {"@type": "Person", "name": "Amit Kumar"},
+          "mainEntityOfPage": "https://amitk.pages.dev/blog/backend-architecture-patterns/",
+          "image": "https://amitk.pages.dev/amit_kumar_backend_developer.png",
+          "keywords": ["System Design", "Microservices", "Monolith", "Event-Driven", "CQRS", "Saga Pattern", "Circuit Breaker", "Architecture Patterns"]
+        }
+      ]
+    }
+    </script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo"><a href="../../index.html"><h2>AK</h2></a></div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="../../index.html" class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="../../index.html#about" class="nav-link">About</a></li>
+                <li class="nav-item"><a href="../../index.html#projects" class="nav-link">Projects</a></li>
+                <li class="nav-item"><a href="../../docgen-studio/" class="nav-link nav-featured">DocGen <span class="nav-new">New</span></a></li>
+                <li class="nav-item"><a href="../../index.html#contact" class="nav-link">Contact</a></li>
+            </ul>
+            <div class="hamburger" aria-label="Toggle navigation"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+        </div>
+    </nav>
+
+    <main class="guide-main">
+        <header class="guide-hero container">
+            <p class="product-kicker">Architecture Guide · System Design</p>
+            <h1>Backend Architecture Patterns: When to Use What</h1>
+            <p class="answer-block" id="answer"><strong>This is not a catalog of patterns — it's a decision framework.</strong> Every pattern has a cost. The right choice depends on team size, traffic profile, consistency requirements, and operational maturity. Based on building production systems at 10K+ RPS across e-commerce, social, and analytics domains.</p>
+            <p class="guide-meta">~15 min read · For senior engineers & architects · <a href="../api-design-best-practices/">Next: API Design Best Practices →</a></p>
+        </header>
+
+        <nav class="jump-nav container" aria-label="Article sections">
+            <a href="#monolith-vs-micro">Monolith vs Microservices</a>
+            <a href="#event-driven">Event-Driven Architecture</a>
+            <a href="#cqrs">CQRS</a>
+            <a href="#saga">Saga Pattern</a>
+            <a href="#circuit-breaker">Circuit Breaker</a>
+            <a href="#decision-matrix">Decision Matrix</a>
+        </nav>
+
+        <section id="monolith-vs-micro" class="container">
+            <h2>Monolith vs Microservices: The Real Decision Factors</h2>
+            <p class="answer-block"><strong>Start with a modular monolith. Extract services only when you have a specific scaling or organizational need.</strong> Most "microservices" failures are actually premature decomposition.</p>
+
+            <h3>Stay with monolith when:</h3>
+            <ul>
+                <li>Team < 10 engineers</li>
+                <li>Single deployable unit simplifies CI/CD, debugging, transactions</li>
+                <li>Domain boundaries unclear (early product)</li>
+                <li>Low traffic (< 10K RPS) — vertical scaling works</li>
+                <li>Strong consistency required across domains</li>
+            </ul>
+
+            <h3>Extract services when:</h3>
+            <ul>
+                <li>Different scaling profiles (e.g., image processing vs API)</li>
+                <li>Team autonomy needed (separate deploy cycles, ownership)</li>
+                <li>Technology heterogeneity (ML service in Python, API in Go)</li>
+                <li>Failure isolation critical (payment service shouldn't crash search)</li>
+            </ul>
+
+            <h3>The modular monolith middle ground</h3>
+            <pre><code>// Package-by-feature, not layer
+src/
+├── modules/
+│   ├── orders/
+│   │   ├── domain/      # Entities, value objects, domain events
+│   │   ├── application/ # Use cases, commands, queries
+│   │   ├── infrastructure/ # Repositories, external adapters
+│   │   └── api/         # HTTP controllers
+│   ├── products/
+│   │   └── ...
+│   └── users/
+│       └── ...
+├── shared/              # Kernel: events, value objects, utils
+└── main.ts              # Composition root</code></pre>
+
+            <p>Clear module boundaries = easy extraction later. Shared kernel = controlled coupling. This is how Shopify, GitHub, and Basecamp operate at massive scale.</p>
+        </section>
+
+        <section id="event-driven" class="container">
+            <h2>Event-Driven Architecture: Not Just for Microservices</h2>
+            <p class="answer-block"><strong>Events decouple producers from consumers. Use for: audit trails, async workflows, cross-module communication, eventual consistency.</strong> Can live inside a monolith (in-memory event bus) or across services (Kafka, RabbitMQ).</p>
+
+            <h3>When to use</h3>
+            <ul>
+                <li>Multiple downstream reactions to one action (order placed → email, inventory, analytics, loyalty)</li>
+                <li>Long-running processes (order → payment → fulfillment → delivery)</li>
+                <li>Integration with external systems (webhooks, CDC)</li>
+            </ul>
+
+            <h3>Event design principles</h3>
+            <pre><code>// Good: Domain event (past tense, immutable, expressive)
+interface OrderPlaced {
+  eventType: "OrderPlaced";
+  eventId: string;           // UUID for idempotency
+  occurredAt: string;        // ISO 8601
+  aggregateId: string;       // Order ID
+  payload: {
+    orderId: string;
+    customerId: string;
+    items: OrderItem[];
+    total: Money;
+    shippingAddress: Address;
+  };
+  metadata: {
+    correlationId: string;   // Trace across services
+    causationId: string;     // What triggered this
+  };
+}
+
+// Bad: CRUD event (leaks implementation)
+interface OrderCreated {
+  table: "orders";
+  operation: "INSERT";
+  data: { ... };
+}</code></pre>
+
+            <h3>Pitfalls to avoid</h3>
+            <ul>
+                <li><strong>Event sourcing by default:</strong> Adds massive complexity. Only when you need full audit/replay.</li>
+                <li><strong>Choreography everywhere:</strong> Hard to trace. Use orchestration (Saga) for business workflows.</li>
+                <li><strong>No schema registry:</strong> Breaks consumers. Use Avro/Protobuf + Schema Registry.</li>
+                <li><strong>At-least-once without idempotency:</strong> Duplicate processing. Every consumer must be idempotent.</li>
+            </ul>
+        </section>
+
+        <section id="cqrs" class="container">
+            <h2>CQRS (Command Query Responsibility Segregation)</h2>
+            <p class="answer-block"><strong>Separate read and write models. Write model handles commands (validation, invariants). Read model handles queries (denormalized, optimized).</strong> Not the same as Event Sourcing — can use same database with different schemas.</p>
+
+            <h3>When CQRS pays off</h3>
+            <ul>
+                <li>Read/write patterns vastly different (complex queries vs simple commands)</li>
+                <li>Read models need different data shapes (dashboard vs detail view)</li>
+                <li>Team can maintain two models (operational cost)</li>
+            </ul>
+
+            <h3>Simple CQRS in a monolith (same DB, different tables)</h3>
+            <pre><code>// Write model (normalized, invariants enforced)
+@Entity
+class Order {
+  @Id OrderId id;
+  CustomerId customerId;
+  List<OrderItem> items;
+  OrderStatus status;
+  // Invariants: items not empty, status transitions valid
+  void addItem(ProductId, Quantity) { ... }
+  void cancel() { if (status != PENDING) throw; status = CANCELLED; }
+}
+
+// Read model (denormalized, query-optimized)
+@Entity
+class OrderSummaryView {
+  @Id String orderId;
+  String customerName;
+  String customerEmail;
+  int itemCount;
+  Money total;
+  OrderStatus status;
+  LocalDateTime placedAt;
+  // Updated via @EventListener on OrderPlaced/OrderCancelled
+}</code></pre>
+
+            <h3>When NOT to use CQRS</h3>
+            <ul>
+                <li>Simple CRUD — adds indirection without benefit</li>
+                <li>Team unfamiliar — eventual consistency bugs are subtle</li>
+                <li>Low query complexity — single model serves both well</li>
+            </ul>
+        </section>
+
+        <section id="saga" class="container">
+            <h2>Saga Pattern: Distributed Transactions Without 2PC</h2>
+            <p class="answer-block"><strong>Chain of local transactions with compensating actions for rollback. Two flavors: Choreography (events) vs Orchestration (central coordinator).</strong> Orchestration wins for complex workflows — visible, testable, debuggable.</p>
+
+            <h3>Orchestration-based Saga (recommended)</h3>
+            <pre><code>// Saga orchestrator (state machine)
+class OrderSaga {
+  private enum Step { RESERVE_INVENTORY, CHARGE_PAYMENT, CONFIRM_ORDER, COMPENSATE }
+  
+  async execute(orderId: OrderId) {
+    const state = { orderId, step: Step.RESERVE_INVENTORY, completed: [] };
+    
+    try {
+      // Step 1: Reserve inventory
+      await inventoryClient.reserve(orderId);
+      state.completed.push(Step.RESERVE_INVENTORY);
+      
+      // Step 2: Charge payment
+      await paymentClient.charge(orderId);
+      state.completed.push(Step.CHARGE_PAYMENT);
+      
+      // Step 3: Confirm order
+      await orderClient.confirm(orderId);
+      state.completed.push(Step.CONFIRM_ORDER);
+      
+    } catch (error) {
+      await this.compensate(state.completed.reverse(), orderId);
+      throw error;
+    }
+  }
+  
+  private async compensate(completed: Step[], orderId: OrderId) {
+    for (const step of completed) {
+      switch (step) {
+        case Step.CHARGE_PAYMENT: await paymentClient.refund(orderId); break;
+        case Step.RESERVE_INVENTORY: await inventoryClient.release(orderId); break;
+      }
+    }
+  }
+}</code></pre>
+
+            <h3>Saga design rules</h3>
+            <ul>
+                <li>Each step must be idempotent (retry safe)</li>
+                <li>Compensations must be idempotent and commutative</li>
+                <li>Store saga state persistently (survive orchestrator restart)</li>
+                <li>Timeouts on each step (prevent stuck sagas)</li>
+                <li>Observability: log every step start/complete/compensate</li>
+            </ul>
+
+            <h3>Choreography alternative (simpler, less control)</h3>
+            <p>Services emit/consume events. OrderService emits <code>OrderCreated</code> → InventoryService reserves → emits <code>InventoryReserved</code> → PaymentService charges. Harder to debug, no central visibility. OK for 2-3 steps max.</p>
+        </section>
+
+        <section id="circuit-breaker" class="container">
+            <h2>Circuit Breaker: Fail Fast, Recover Gracefully</h2>
+            <p class="answer-block"><strong>Prevent cascade failures when downstream dependency degrades. Three states: Closed (normal) → Open (failing fast) → Half-Open (testing recovery).</strong> Essential for any service calling external APIs or other services.</p>
+
+            <h3>Implementation (Resilience4j / custom)</h3>
+            <pre><code>@Configuration
+public class CircuitBreakerConfig {
+  @Bean
+  public CircuitBreakerRegistry circuitBreakerRegistry() {
+    CircuitBreakerConfig config = CircuitBreakerConfig.custom()
+      .failureRateThreshold(50)              // Open at 50% failure
+      .waitDurationInOpenState(Duration.ofSeconds(30))
+      .slidingWindowSize(10)                 // Last 10 calls
+      .minimumNumberOfCalls(5)               // Need 5 calls to evaluate
+      .permittedNumberOfCallsInHalfOpenState(3)
+      .recordExceptions(ConnectException.class, SocketTimeoutException.class)
+      .build();
+    return CircuitBreakerRegistry.of(config);
+  }
+}
+
+// Usage
+@Service
+class PaymentClient {
+  private final CircuitBreaker cb = cbRegistry.circuitBreaker("payment-service");
+  
+  public PaymentResponse charge(ChargeRequest req) {
+    return cb.executeSupplier(() -> httpClient.post("/charge", req));
+  }
+  
+  // Fallback for graceful degradation
+  public PaymentResponse chargeWithFallback(ChargeRequest req) {
+    return Try.ofSupplier(() -> cb.executeSupplier(() -> httpClient.post("/charge", req)))
+      .recover(throwable -> PaymentResponse.deferred(req.id())) // Queue for later
+      .get();
+  }
+}</code></pre>
+
+            <h3>Monitoring the circuit</h3>
+            <ul>
+                <li>Metrics: state transitions, failure rate, call latency</li>
+                <li>Alert on: Open state > 1min, frequent Half-Open failures</li>
+                <li>Dashboard: per-dependency circuit state + latency percentiles</li>
+            </ul>
+        </section>
+
+        <section id="decision-matrix" class="container">
+            <h2>Pattern Decision Matrix</h2>
+            <p class="answer-block"><strong>Use this as a starting point. Context always wins.</strong></p>
+
+            <table style="width:100%; border-collapse:collapse; margin:16px 0; color:#cbd5e1; font-size:14px;">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--border);">
+                        <th style="text-align:left; padding:8px;">Scenario</th>
+                        <th style="text-align:left; padding:8px;">Recommended Pattern(s)</th>
+                        <th style="text-align:left; padding:8px;">Avoid</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">New product, small team, unclear domain</td><td style="padding:8px;">Modular monolith</td><td style="padding:8px;">Microservices, CQRS, Event Sourcing</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">High traffic, different scaling needs</td><td style="padding:8px;">Microservices (strategic split)</td><td style="padding:8px;">Premature extraction</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Complex multi-step business workflow</td><td style="padding:8px;">Orchestrated Saga</td><td style="padding:8px;">Choreography >3 steps, 2PC</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Audit trail / regulatory compliance</td><td style="padding:8px;">Event Sourcing + CQRS</td><td style="padding:8px;">Simple logging</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Read-heavy, complex queries</td><td style="padding:8px;">CQRS (read replicas, materialized views)</td><td style="padding:8px;">Over-engineering simple CRUD</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">External API dependencies</td><td style="padding:8px;">Circuit Breaker + Retry + Timeout</td><td style="padding:8px;">No resilience patterns</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Real-time notifications / async processing</td><td style="padding:8px;">Event-Driven (Kafka/RabbitMQ)</td><td style="padding:8px;">Polling, tight coupling</td></tr>
+                    <tr><td style="padding:8px;">Team autonomy required</td><td style="padding:8px;">Microservices (with clear contracts)</td><td style="padding:8px;">Shared database, distributed monolith</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Anti-patterns to recognize</h3>
+            <ul>
+                <li><strong>Distributed monolith:</strong> Services share DB, deploy together, fail together</li>
+                <li><strong>Event-driven spaghetti:</strong> Events for everything, no ownership, circular dependencies</li>
+                <li><strong>CQRS without need:</strong> Double the models, half the velocity</li>
+                <li><strong>Saga without compensation:</strong> Partial failure = data corruption</li>
+            </ul>
+        </section>
+
+        <section class="container guide-cta">
+            <h2>Continue Learning</h2>
+            <p>Read the companion guides on API design, database scaling, and the backend developer roadmap.</p>
+            <div class="hero-buttons">
+                <a href="../api-design-best-practices/" class="btn btn-primary">API Design Best Practices →</a>
+                <a href="../database-scaling-strategies/" class="btn btn-secondary">Database Scaling Strategies →</a>
+                <a href="../backend-developer-roadmap/" class="btn btn-secondary">Backend Developer Roadmap →</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Amit Kumar. <a href="../../index.html">← Back to Portfolio</a></p>
+        </div>
+    </footer>
+    <script src="../../script.js"></script>
+</body>
+</html>

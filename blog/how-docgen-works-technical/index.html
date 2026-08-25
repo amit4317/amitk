@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G2K98Y4CGE"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-G2K98Y4CGE');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="alternate" hreflang="en" href="https://amitk.pages.dev/blog/how-docgen-works-technical/" />
+    <link rel="alternate" hreflang="x-default" href="https://amitk.pages.dev/blog/how-docgen-works-technical/" />
+    <title>How DocGen Studio Works: Technical Deep-Dive — Click Capture, Annotation, AI | Amit Kumar</title>
+    <meta name="description" content="Technical deep-dive: How DocGen Studio captures clicks via content scripts, annotates screenshots with Canvas API, manages state with IndexedDB, and integrates OpenRouter for AI drafting.">
+    <link rel="canonical" href="https://amitk.pages.dev/blog/how-docgen-works-technical/">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="How DocGen Studio Works: Technical Deep-Dive">
+    <meta property="og:description" content="Content scripts, Canvas API annotation, IndexedDB state, OpenRouter AI integration. Full architecture of a Chrome extension for documentation.">
+    <meta property="og:url" content="https://amitk.pages.dev/blog/how-docgen-works-technical/">
+    <meta property="og:image" content="https://amitk.pages.dev/docgen-studio/promo.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="How DocGen Studio Works: Technical Deep-Dive">
+    <meta name="twitter:description" content="Chrome extension architecture: click capture, screenshot annotation, local-first state, BYO AI. For developers.">
+    <meta name="twitter:image" content="https://amitk.pages.dev/docgen-studio/promo.png">
+    <link rel="icon" href="../../favicon.ico">
+    <link rel="stylesheet" href="../../styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://amitk.pages.dev/"},
+            {"@type": "ListItem", "position": 2, "name": "Blog", "item": "https://amitk.pages.dev/blog/"},
+            {"@type": "ListItem", "position": 3, "name": "How DocGen Studio Works", "item": "https://amitk.pages.dev/blog/how-docgen-works-technical/"}
+          ]
+        },
+        {
+          "@type": "TechArticle",
+          "headline": "How DocGen Studio Works: Technical Deep-Dive",
+          "description": "Architecture of a Chrome extension for documentation: click capture via content scripts, Canvas API annotation, IndexedDB persistence, OpenRouter AI integration, PDF/Markdown export.",
+          "datePublished": "2026-08-25",
+          "dateModified": "2026-08-25",
+          "author": {"@type": "Person", "name": "Amit Kumar", "url": "https://amitk.pages.dev/"},
+          "publisher": {"@type": "Person", "name": "Amit Kumar"},
+          "mainEntityOfPage": "https://amitk.pages.dev/blog/how-docgen-works-technical/",
+          "image": "https://amitk.pages.dev/docgen-studio/promo.png",
+          "keywords": ["Chrome Extension", "Content Scripts", "Canvas API", "IndexedDB", "OpenRouter", "jsPDF", "Manifest V3", "Architecture"]
+        }
+      ]
+    }
+    </script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo"><a href="../../index.html"><h2>AK</h2></a></div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="../../index.html" class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="../../index.html#about" class="nav-link">About</a></li>
+                <li class="nav-item"><a href="../../index.html#projects" class="nav-link">Projects</a></li>
+                <li class="nav-item"><a href="../../docgen-studio/" class="nav-link nav-featured">DocGen <span class="nav-new">New</span></a></li>
+                <li class="nav-item"><a href="../../index.html#contact" class="nav-link">Contact</a></li>
+            </ul>
+            <div class="hamburger" aria-label="Toggle navigation"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+        </div>
+    </nav>
+
+    <main class="guide-main">
+        <header class="guide-hero container">
+            <p class="product-kicker">Technical Deep-Dive · Chrome Extension Architecture</p>
+            <h1>How DocGen Studio Works Under the Hood</h1>
+            <p class="answer-block" id="answer"><strong>DocGen Studio is a Manifest V3 Chrome extension built with vanilla JavaScript (no framework).</strong> It captures clicks via content scripts, annotates screenshots using Canvas API, persists state in IndexedDB, and optionally integrates with OpenRouter for AI-assisted drafting. This article walks through each subsystem with code references.</p>
+            <p class="guide-meta">For developers · ~12 min read · <a href="../../docgen-studio/how-to-use.html">See the user guide →</a></p>
+        </header>
+
+        <nav class="jump-nav container" aria-label="Article sections">
+            <a href="#manifest">Manifest V3 Setup</a>
+            <a href="#click-capture">Click Capture</a>
+            <a href="#screenshot">Screenshot & Annotation</a>
+            <a href="#state">State Management (IndexedDB)</a>
+            <a href="#ai">OpenRouter AI Integration</a>
+            <a href="#export">PDF & Markdown Export</a>
+            <a href="#privacy">Privacy by Design</a>
+            <a href="#future">Future Improvements</a>
+        </nav>
+
+        <section id="manifest" class="container">
+            <h2>Manifest V3 Configuration</h2>
+            <p class="answer-block"><strong>Manifest V3 requires service workers for background logic, declarative net request for permissions, and explicit host permissions.</strong> DocGen Studio uses minimal permissions: activeTab, scripting, downloads, storage.</p>
+
+            <h3>Key manifest entries</h3>
+            <pre><code>{
+  "manifest_version": 3,
+  "name": "DocGen Studio",
+  "version": "1.0.0",
+  "permissions": ["activeTab", "scripting", "downloads", "storage"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["content.js"],
+    "run_at": "document_idle"
+  }],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.png"
+  },
+  "web_accessible_resources": [{
+    "resources": ["injected.js"],
+    "matches": ["<all_urls>"]
+  }]
+}</code></pre>
+
+            <h3>Why activeTab + host_permissions?</h3>
+            <p><code>activeTab</code> grants temporary access to the current tab on user action (clicking extension icon). <code>host_permissions: ["<all_urls>"]</code> allows content script injection on any page without warnings. The combination enables recording on any site the user visits.</p>
+        </section>
+
+        <section id="click-capture" class="container">
+            <h2>Click Capture: Content Script + Event Delegation</h2>
+            <p class="answer-block"><strong>Single delegated listener on <code>document</code> captures all clicks, extracts element metadata, and sends to background via <code>chrome.runtime.sendMessage</code>.</strong> Avoids per-element listeners (memory leaks, SPA navigation issues).</p>
+
+            <h3>Content script (simplified)</h3>
+            <pre><code>// content.js
+let isRecording = false;
+
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg.type === "START_RECORDING") {
+    isRecording = true;
+    sendResponse({ok: true});
+  } else if (msg.type === "STOP_RECORDING") {
+    isRecording = false;
+    sendResponse({ok: true});
+  }
+});
+
+document.addEventListener("click", async (e) => {
+  if (!isRecording) return;
+  if (e.target.closest("#docgen-ignore")) return; // Ignore extension UI
+
+  const element = e.target;
+  const rect = element.getBoundingClientRect();
+  
+  const clickData = {
+    timestamp: Date.now(),
+    url: window.location.href,
+    title: document.title,
+    selector: generateSelector(element),  // CSS selector for replay
+    tagName: element.tagName,
+    text: element.innerText?.slice(0, 100),
+    attributes: extractAttributes(element), // id, class, role, aria-label, etc.
+    position: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+    viewport: { width: window.innerWidth, height: window.innerHeight }
+  };
+
+  chrome.runtime.sendMessage({ type: "CLICK_CAPTURED", data: clickData });
+}, true); // Capture phase for priority</code></pre>
+
+            <h3>Selector generation (for replay/highlight)</h3>
+            <pre><code>function generateSelector(el) {
+  if (el.id) return `#${el.id}`;
+  const parts = [];
+  while (el && el !== document.body) {
+    let part = el.tagName.toLowerCase();
+    if (el.className) {
+      const classes = el.className.split(/\s+/).filter(c => !c.startsWith("docgen-"));
+      if (classes.length) part += "." + classes.join(".");
+    }
+    const siblings = Array.from(el.parentElement?.children || []);
+    const sameTag = siblings.filter(s => s.tagName === el.tagName);
+    if (sameTag.length > 1) {
+      part += `:nth-of-type(${sameTag.indexOf(el) + 1})`;
+    }
+    parts.unshift(part);
+    el = el.parentElement;
+  }
+  return parts.join(" > ");
+}</code></pre>
+
+            <h3>SPA navigation handling</h3>
+            <p>Content script persists across SPA navigations (no reload). <code>chrome.webNavigation.onHistoryStateUpdated</code> in background detects route changes and notifies content script to update current URL context.</p>
+        </section>
+
+        <section id="screenshot" class="container">
+            <h2>Screenshot Capture & Canvas Annotation</h2>
+            <p class="answer-block"><strong><code>chrome.tabs.captureVisibleTab</code> captures the viewport; Canvas API draws annotations (arrow, label, highlight box) at recorded coordinates.</strong> Focused Crop (60%) creates a zoomed region around the click target.</p>
+
+            <h3>Capture flow</h3>
+            <ol>
+                <li>Background receives <code>CLICK_CAPTURED</code></li>
+                <li>Calls <code>chrome.tabs.captureVisibleTab(tabId, {format: 'png', quality: 90})</code></li>
+                <li>Returns data URL → passed to offscreen document for annotation</li>
+            </ol>
+
+            <h3>Offscreen document for Canvas (Manifest V3 requirement)</h3>
+            <pre><code>// offscreen.html (declared in manifest)
+&lt;canvas id="canvas"&gt;&lt;/canvas&gt;
+&lt;script src="offscreen.js" type="module"&gt;&lt;/script&gt;
+
+// offscreen.js
+chrome.runtime.onMessage.addListener(async (msg) => {
+  if (msg.type === "ANNOTATE_SCREENSHOT") {
+    const { screenshotDataUrl, clickData, options } = msg;
+    const img = await loadImage(screenshotDataUrl);
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    
+    // Set canvas to screenshot size (or cropped size)
+    const { width, height } = calculateCanvasSize(img, clickData, options);
+    canvas.width = width;
+    canvas.height = height;
+    
+    // Draw screenshot (full or cropped)
+    if (options.focusedCrop) {
+      drawFocusedCrop(ctx, img, clickData);
+    } else {
+      ctx.drawImage(img, 0, 0, width, height);
+    }
+    
+    // Draw annotation: highlight box, arrow, label
+    drawAnnotation(ctx, clickData, options);
+    
+    // Return annotated data URL
+    const annotatedDataUrl = canvas.toDataURL("image/png");
+    chrome.runtime.sendMessage({ type: "ANNOTATION_COMPLETE", dataUrl: annotatedDataUrl });
+  }
+});</code></pre>
+
+            <h3>Annotation drawing (simplified)</h3>
+            <pre><code>function drawAnnotation(ctx, clickData, options) {
+  const { position } = clickData;
+  const scale = options.focusedCrop ? 1.67 : 1; // 60% crop = 1/0.6
+  
+  const x = position.x * scale;
+  const y = position.y * scale;
+  const w = position.width * scale;
+  const h = position.height * scale;
+  
+  // Highlight box (extra thick)
+  ctx.strokeStyle = "#00D4FF";
+  ctx.lineWidth = 4 * scale;
+  ctx.strokeRect(x - 2, y - 2, w + 4, h + 4);
+  
+  // Arrow from label to element center
+  const labelX = x + w / 2;
+  const labelY = y - 30 * scale;
+  ctx.beginPath();
+  ctx.moveTo(labelX, labelY);
+  ctx.lineTo(x + w/2, y);
+  ctx.strokeStyle = "#00D4FF";
+  ctx.lineWidth = 3 * scale;
+  ctx.stroke();
+  
+  // Label background
+  ctx.fillStyle = "#00D4FF";
+  ctx.font = `bold ${14 * scale}px Inter, sans-serif`;
+  const text = `Click ${clickData.tagName}`;
+  const metrics = ctx.measureText(text);
+  ctx.fillRect(labelX - metrics.width/2 - 8, labelY - 20, metrics.width + 16, 24);
+  
+  // Label text
+  ctx.fillStyle = "#0B1020";
+  ctx.fillText(text, labelX - metrics.width/2, labelY - 4);
+}</code></pre>
+
+            <h3>Focused Crop (60%) math</h3>
+            <p>Viewport coordinates → crop region centered on click with 60% of viewport dimensions. Ensures annotation stays readable in dense UIs.</p>
+        </section>
+
+        <section id="state" class="container">
+            <h2>State Management: IndexedDB (idb wrapper)</h2>
+            <p class="answer-block"><strong>All recording state (clicks, screenshots, settings) lives in IndexedDB via the <code>idb</code> library.</strong> Survives extension restarts, popup closes, browser restarts. No cloud sync.</p>
+
+            <h3>Schema</h3>
+            <pre><code>// db.js
+import { openDB } from 'idb';
+
+const DB_NAME = 'docgen-studio';
+const STORES = {
+  recordings: 'recordings',      // Active recording session
+  steps: 'steps',                // Individual steps (click + screenshot)
+  settings: 'settings',          // User preferences
+  apiKeys: 'apiKeys'             // Encrypted OpenRouter key
+};
+
+export async function getDB() {
+  return openDB(DB_NAME, 1, {
+    upgrade(db) {
+      db.createObjectStore(STORES.recordings, { keyPath: 'id' });
+      db.createObjectStore(STORES.steps, { keyPath: 'id', autoIncrement: true });
+      db.createObjectStore(STORES.settings, { keyPath: 'key' });
+      db.createObjectStore(STORES.apiKeys, { keyPath: 'provider' });
+    }
+  });
+}</code></pre>
+
+            <h3>Recording session lifecycle</h3>
+            <pre><code>// Start recording
+async function startRecording() {
+  const db = await getDB();
+  const recording = {
+    id: crypto.randomUUID(),
+    startedAt: Date.now(),
+    url: tab.url,
+    title: tab.title,
+    stepCount: 0
+  };
+  await db.put(STORES.recordings, recording);
+  // Notify content script
+  chrome.tabs.sendMessage(tabId, { type: "START_RECORDING" });
+}
+
+// On click captured (background)
+async function onClickCaptured(clickData, screenshotDataUrl) {
+  const db = await getDB();
+  const tx = db.transaction(STORES.steps, 'readwrite');
+  await tx.store.add({
+    recordingId: currentRecordingId,
+    clickData,
+    screenshot: screenshotDataUrl,
+    order: ++stepCount,
+    createdAt: Date.now()
+  });
+  await tx.done;
+}</code></pre>
+
+            <h3>Why IndexedDB over localStorage?</h3>
+            <ul>
+                <li><strong>Capacity:</strong> 5MB (localStorage) vs hundreds of MB (IndexedDB) — screenshots are large</li>
+                <li><strong>Async:</strong> Non-blocking, doesn't freeze UI thread</li>
+                <li><strong>Indexing:</strong> Query by recordingId, order, timestamp</li>
+                <li><strong>Transactions:</strong> Atomic multi-step operations</li>
+            </ul>
+        </section>
+
+        <section id="ai" class="container">
+            <h2>OpenRouter AI Integration: Single-Call Multimodal</h2>
+            <p class="answer-block"><strong>One API call sends all click labels + screenshots (as base64) to OpenRouter; returns structured JSON with document title, summary, and step instructions.</strong> User provides their own API key and model choice.</p>
+
+            <h3>Request payload (simplified)</h3>
+            <pre><code>const buildAIPrompt = (steps, options) => {
+  const clickLabels = steps.map((s, i) => 
+    `Step ${i+1}: User clicked a ${s.clickData.tagName.toLowerCase()} ` +
+    `labeled "${s.clickData.text || 'unnamed'}" at (${s.clickData.position.x}, ${s.clickData.position.y})`
+  ).join("\n");
+
+  return {
+    model: options.model, // e.g., "google/gemini-2.0-flash-lite-preview-02-05:free"
+    messages: [
+      {
+        role: "system",
+        content: `You are a technical writer creating a SaaS how-to guide. 
+        Given a sequence of user clicks, produce:
+        1. Document title (starts with "How to...")
+        2. 1-2 sentence overview
+        3. For each step: title (imperative) + instruction (1-2 sentences)
+        Output ONLY valid JSON matching the schema.`
+      },
+      {
+        role: "user",
+        content: [
+          { type: "text", text: `Clicks:\n${clickLabels}` },
+          ...(options.includeImages ? steps.map(s => ({
+            type: "image_url",
+            image_url: { url: s.screenshot } // base64 data URL
+          })) : [])
+        ]
+      }
+    ],
+    response_format: { type: "json_object" },
+    temperature: 0.3,
+    max_tokens: 4000
+  };
+};</code></pre>
+
+            <h3>Response schema (validated client-side)</h3>
+            <pre><code>{
+  "documentTitle": "How to fill out and submit a form",
+  "overview": "This guide walks through completing the contact form...",
+  "steps": [
+    {
+      "title": "Navigate to the contact page",
+      "instruction": "Click the Contact link in the navigation bar to open the form page."
+    },
+    {
+      "title": "Enter your name",
+      "instruction": "Click the Name field and type your full name."
+    }
+    // ...
+  ]
+}</code></pre>
+
+            <h3>Key design decisions</h3>
+            <ul>
+                <li><strong>Single call:</strong> All steps in one request → lower latency, lower cost, consistent tone</li>
+                <li><strong>Images optional:</strong> User can disable screenshot upload to AI (privacy/bandwidth)</li>
+                <li><strong>Fallback:</strong> No key = local template-based text ("Click the [element]")</li>
+                <li><strong>Streaming UI:</strong> Shows "Generating AI..." per step, updates as chunks arrive</li>
+            </ul>
+        </section>
+
+        <section id="export" class="container">
+            <h2>PDF & Markdown Export</h2>
+            <p class="answer-block"><strong>Markdown: string templating. PDF: jsPDF with auto-table for steps, embedded annotated images.</strong> Both generated client-side; no server.</p>
+
+            <h3>Markdown generation</h3>
+            <pre><code>function generateMarkdown(doc) {
+  let md = `# ${doc.title}\n\n`;
+  md += `${doc.overview}\n\n`;
+  md += `*Generated with DocGen Studio on ${new Date().toLocaleDateString()}*\n\n`;
+  md += `## Steps\n\n`;
+  
+  doc.steps.forEach((step, i) => {
+    md += `### ${i+1}. ${step.title}\n\n`;
+    md += `${step.instruction}\n\n`;
+    if (step.screenshot) {
+      // Embed as base64 (large) or reference local file
+      md += `![Step ${i+1}](${step.screenshot})\n\n`;
+    }
+  });
+  
+  return md;
+}
+
+// Download
+function downloadMarkdown(md, title) {
+  const blob = new Blob([md], { type: "text/markdown" });
+  const url = URL.createObjectURL(blob);
+  chrome.downloads.download({
+    url,
+    filename: `${slugify(title)}.md`,
+    saveAs: true
+  });
+}</code></pre>
+
+            <h3>PDF generation (jsPDF + autoTable)</h3>
+            <pre><code>import { jsPDF } from "jspdf";
+import "jspdf-autotable";
+
+async function generatePDF(doc) {
+  const pdf = new jsPDF({ unit: "mm", format: "a4" });
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  let y = 20;
+
+  // Title
+  pdf.setFontSize(22);
+  pdf.text(doc.title, pageWidth/2, y, { align: "center" });
+  y += 10;
+
+  // Overview
+  pdf.setFontSize(11);
+  const overviewLines = pdf.splitTextToSize(doc.overview, pageWidth - 40);
+  pdf.text(overviewLines, 20, y);
+  y += overviewLines.length * 5 + 10;
+
+  // Steps table
+  const tableData = doc.steps.map((step, i) => [
+    `${i+1}`,
+    step.title,
+    step.instruction,
+    step.screenshot ? "📷" : ""
+  ]);
+
+  pdf.autoTable({
+    startY: y,
+    head: [["#", "Step", "Instruction", ""]],
+    body: tableData,
+    theme: "striped",
+    headStyles: { fillColor: [99, 102, 241] },
+    columnStyles: {
+      0: { cellWidth: 10 },
+      1: { cellWidth: 50 },
+      2: { cellWidth: 110 },
+      3: { cellWidth: 10 }
+    },
+    didDrawCell: async (data) => {
+      if (data.column.index === 3 && data.cell.section === "body") {
+        const step = doc.steps[data.row.index];
+        if (step.screenshot) {
+          const img = await loadImage(step.screenshot);
+          pdf.addImage(img, "PNG", data.cell.x + 2, data.cell.y + 2, 6, 6);
+        }
+      }
+    }
+  });
+
+  pdf.save(`${slugify(doc.title)}.pdf`);
+}</code></pre>
+        </section>
+
+        <section id="privacy" class="container">
+            <h2>Privacy by Design</h2>
+            <p class="answer-block"><strong>Architecture decisions that enforce local-first privacy:</strong></p>
+
+            <ul>
+                <li><strong>No backend:</strong> No server, no database, no analytics, no telemetry. Extension is entirely client-side.</li>
+                <li><strong>No content script tracking:</strong> Content script only activates on user-initiated recording. No passive monitoring.</li>
+                <li><strong>OpenRouter direct:</strong> API key stored in Chrome local storage (encrypted via <code>crypto.subtle</code>). Requests go directly to OpenRouter; extension never sees the key in plaintext after initial save.</li>
+                <li><strong>Images never sent to AI unless opted in:</strong> Default prompt excludes screenshots. User must enable "Include images in AI request" in settings.</li>
+                <li><strong>Export is local download:</strong> <code>chrome.downloads.download</code> saves to user's Downloads folder. No upload.</li>
+                <li><strong>No account system:</strong> No email, no auth, no user IDs. Zero PII collected.</li>
+            </ul>
+
+            <h3>Threat model</h3>
+            <table style="width:100%; border-collapse:collapse; margin:16px 0; color:#cbd5e1;">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--border);">
+                        <th style="text-align:left; padding:8px;">Threat</th>
+                        <th style="text-align:left; padding:8px;">Mitigation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Extension compromised</td><td style="padding:8px;">No sensitive data stored; key encrypted; no server to breach</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Malicious update</td><td style="padding:8px;">Chrome Web Store review; user must accept update</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">OpenRouter key theft</td><td style="padding:8px;">Encrypted at rest; sent only to OpenRouter via HTTPS</td></tr>
+                    <tr><td style="padding:8px;">Screenshot leakage</td><td style="padding:8px;">Never leave device unless user exports</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="future" class="container">
+            <h2>Future Improvements (Roadmap)</h2>
+            <ul>
+                <li><strong>Video export:</strong> WebM/MP4 from recorded steps (MediaRecorder API)</li>
+                <li><strong>Collaborative editing:</strong> WebRTC peer-to-peer for real-time co-editing (no server)</li>
+                <li><strong>Plugin system:</strong> Custom annotation types, export formats, AI prompts</li>
+                <li><strong>Firefox/Safari support:</strong> Manifest V3 compatible; minor polyfills needed</li>
+                <li><strong>CLI companion:</strong> Node.js tool for batch export, CI integration</li>
+                <li><strong>Accessibility audit:</strong> Auto-detect missing alt text, contrast issues in recorded flows</li>
+            </ul>
+        </section>
+
+        <section class="container guide-cta">
+            <h2>Explore More</h2>
+            <p>Try DocGen Studio yourself, or read backend architecture patterns for more technical content.</p>
+            <div class="hero-buttons">
+                <a href="../../docgen-studio/how-to-use.html" class="btn btn-primary">Try DocGen Studio (8-min guide)</a>
+                <a href="../backend-architecture-patterns/" class="btn btn-secondary">Backend Architecture Patterns →</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Amit Kumar. <a href="../../index.html">← Back to Portfolio</a></p>
+        </div>
+    </footer>
+    <script src="../../script.js"></script>
+</body>
+</html>

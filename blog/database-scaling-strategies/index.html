@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-G2K98Y4CGE"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-G2K98Y4CGE');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="alternate" hreflang="en" href="https://amitk.pages.dev/blog/database-scaling-strategies/" />
+    <link rel="alternate" hreflang="x-default" href="https://amitk.pages.dev/blog/database-scaling-strategies/" />
+    <title>Database Scaling Strategies: From 10K to 100M Users | Amit Kumar</title>
+    <meta name="description" content="Practical database scaling strategies: indexing, query optimization, read replicas, caching, connection pooling, partitioning vs sharding, SQL vs NoSQL decisions, and cost optimization — stage by stage from 10K to 100M users.">
+    <link rel="canonical" href="https://amitk.pages.dev/blog/database-scaling-strategies/">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Database Scaling Strategies: From 10K to 100M Users">
+    <meta property="og:description" content="Indexing, replicas, caching, pooling, sharding — a stage-by-stage scaling playbook with real numbers from production PostgreSQL and Redis systems.">
+    <meta property="og:url" content="https://amitk.pages.dev/blog/database-scaling-strategies/">
+    <meta property="og:image" content="https://amitk.pages.dev/amit_kumar_backend_developer.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Database Scaling Strategies: From 10K to 100M Users">
+    <meta name="twitter:description" content="When to shard, when to cache, when to just add an index. A practitioner's scaling ladder with specific numbers at every stage.">
+    <meta name="twitter:image" content="https://amitk.pages.dev/amit_kumar_backend_developer.png">
+    <link rel="icon" href="../../favicon.ico">
+    <link rel="stylesheet" href="../../styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://amitk.pages.dev/"},
+            {"@type": "ListItem", "position": 2, "name": "Blog", "item": "https://amitk.pages.dev/blog/"},
+            {"@type": "ListItem", "position": 3, "name": "Database Scaling Strategies", "item": "https://amitk.pages.dev/blog/database-scaling-strategies/"}
+          ]
+        },
+        {
+          "@type": "TechArticle",
+          "headline": "Database Scaling Strategies: From 10K to 100M Users",
+          "description": "Stage-by-stage database scaling playbook: indexing, query optimization, read replicas, caching layers, connection pooling, vertical vs horizontal scaling, partitioning and sharding, SQL vs NoSQL decision framework, and cost optimization.",
+          "datePublished": "2026-08-25",
+          "dateModified": "2026-08-25",
+          "author": {"@type": "Person", "name": "Amit Kumar", "url": "https://amitk.pages.dev/"},
+          "publisher": {"@type": "Person", "name": "Amit Kumar"},
+          "mainEntityOfPage": "https://amitk.pages.dev/blog/database-scaling-strategies/",
+          "image": "https://amitk.pages.dev/amit_kumar_backend_developer.png",
+          "keywords": ["Database Scaling Strategies", "When to Shard a Database", "PostgreSQL Scaling", "Read Replicas", "Cache Invalidation", "Connection Pooling", "Shard Key Selection", "SQL vs NoSQL"]
+        }
+      ]
+    }
+    </script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo"><a href="../../index.html"><h2>AK</h2></a></div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="../../index.html" class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="../../index.html#about" class="nav-link">About</a></li>
+                <li class="nav-item"><a href="../../index.html#projects" class="nav-link">Projects</a></li>
+                <li class="nav-item"><a href="../../docgen-studio/" class="nav-link nav-featured">DocGen <span class="nav-new">New</span></a></li>
+                <li class="nav-item"><a href="../../index.html#contact" class="nav-link">Contact</a></li>
+            </ul>
+            <div class="hamburger" aria-label="Toggle navigation"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
+        </div>
+    </nav>
+
+    <main class="guide-main">
+        <header class="guide-hero container">
+            <p class="product-kicker">Database Guide · Scaling</p>
+            <h1>Database Scaling Strategies: From 10K to 100M Users</h1>
+            <p class="answer-block" id="answer"><strong>You don't need sharding until you need sharding.</strong> Most "we need to scale" incidents I've seen were missing indexes or N+1 queries wearing a scale costume. This guide walks the full ladder — indexes, queries, replicas, caching, pooling, partitioning, sharding — with the specific numbers where each lever stops working.</p>
+            <p class="guide-meta">~14 min read · For backend engineers · Related: <a href="../backend-architecture-patterns/">Backend Architecture Patterns →</a></p>
+        </header>
+
+        <nav class="jump-nav container" aria-label="Article sections">
+            <a href="#stages">Scaling Stages</a>
+            <a href="#indexing">Indexing</a>
+            <a href="#query-optimization">Query Optimization</a>
+            <a href="#read-replicas">Read Replicas</a>
+            <a href="#caching">Caching Layers</a>
+            <a href="#connection-pooling">Connection Pooling</a>
+            <a href="#vertical-horizontal">Vertical vs Horizontal</a>
+            <a href="#partitioning-sharding">Partitioning &amp; Sharding</a>
+            <a href="#sql-nosql">SQL vs NoSQL</a>
+            <a href="#cost">Cost Optimization</a>
+        </nav>
+
+        <section id="stages" class="container">
+            <h2>Scaling Stages Overview: The Growth Ladder</h2>
+            <p class="answer-block"><strong>Each user-growth stage has one dominant bottleneck and one cheap first fix.</strong> Jump stages (adding sharding at 50K users) buys complexity without solving your actual problem. Diagnose first, then apply the fix matched to your stage.</p>
+
+            <table style="width:100%; border-collapse:collapse; margin:16px 0; color:#cbd5e1;">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--border);">
+                        <th style="text-align:left; padding:8px;">Stage</th>
+                        <th style="text-align:left; padding:8px;">Typical Bottleneck</th>
+                        <th style="text-align:left; padding:8px;">First Fix</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;"><strong>0–10K users</strong></td><td style="padding:8px;">Missing indexes; N+1 queries (p95 &gt; 200ms)</td><td style="padding:8px;">Add indexes, EXPLAIN everything, fix ORM lazy loading</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;"><strong>10K–100K users</strong></td><td style="padding:8px;">DB CPU 70%+ from read load; connection exhaustion</td><td style="padding:8px;">1–2 read replicas, app-level caching of hot objects, PgBouncer</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;"><strong>100K–1M users</strong></td><td style="padding:8px;">Cache misses on deep pages; write IOPS saturating disk</td><td style="padding:8px;">Dedicated Redis tier, keyset pagination, move blobs to object storage</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;"><strong>1M–10M users</strong></td><td style="padding:8px;">Single-instance write ceiling (~5–20K writes/sec); working set &gt; RAM</td><td style="padding:8px;">Vertical upgrade to limit, table partitioning, async queues for writes, archive cold data</td></tr>
+                    <tr><td style="padding:8px;"><strong>10M+ users</strong></td><td style="padding:8px;">Write scaling beyond one box; blast radius of single instance</td><td style="padding:8px;">Sharding by tenant/user ID, CQRS read models, service-owned databases</td></tr>
+                </tbody>
+            </table>
+
+            <p>The pattern is consistent: <strong>boring fixes first</strong>. Instagram ran 90M+ photos on a handful of Postgres instances with aggressive indexing and application-level sharding done late and deliberately. Nobody's p99 was ever saved by a distributed database they didn't understand yet.</p>
+        </section>
+
+        <section id="indexing" class="container">
+            <h2>Indexing Done Right</h2>
+            <p class="answer-block"><strong>A composite index follows one rule: equality columns first (any order), then range/sort column last.</strong> An index that can serve equality filters plus an ORDER BY turns a 500ms sort-scan into a 2ms index scan. Over-indexing then taxes every INSERT/UPDATE/DELETE — each extra index adds roughly 10–15% to write cost.</p>
+
+            <h3>The composite index rule</h3>
+            <pre><code>-- Query: find orders for a customer in a date range, newest first
+SELECT * FROM orders
+WHERE customer_id = 42
+  AND status = 'shipped'
+  AND created_at >= '2026-01-01'
+ORDER BY created_at DESC;
+
+-- Correct: two equality columns, then the range/sort column LAST
+CREATE INDEX idx_orders_cust_status_created
+    ON orders (customer_id, status, created_at DESC);
+
+-- Wrong: range column in the middle kills the rest of the index.
+-- After created_at is range-scanned, status/customer_id can't be used.
+CREATE INDEX idx_orders_wrong ON orders (customer_id, created_at, status);</code></pre>
+
+            <p>Why order matters: a B-tree index works like a phone book sorted by (last name, first name). You can find all "Smith, J*" instantly, but you cannot efficiently find all people whose first name is "Jamie". Equality columns define contiguous ranges; only one range column can ride along at the tail.</p>
+
+            <h3>Covering indexes: skip the table entirely</h3>
+            <pre><code>-- Hot dashboard query, runs 800 times/sec
+SELECT status, COUNT(*) FROM orders
+WHERE customer_id = 42 GROUP BY status;
+
+-- Index-only scan: every referenced column lives in the index,
+-- zero heap fetches. ~1-3ms instead of ~40ms.
+CREATE INDEX idx_orders_cust_covering
+    ON orders (customer_id) INCLUDE (status);
+
+-- Postgres: verify with EXPLAIN (ANALYZE, BUFFERS)
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT status, COUNT(*) FROM orders WHERE customer_id = 42 GROUP BY status;
+-- Look for: Index Only Scan ... Heap Fetches: 0</code></pre>
+
+            <h3>Reading EXPLAIN in 60 seconds</h3>
+            <ul>
+                <li><strong>Seq Scan on a big table + filter:</strong> missing index (fine under ~1K rows)</li>
+                <li><strong>Rows estimate ≫ actual rows:</strong> stale statistics — run ANALYZE; bad plans follow</li>
+                <li><strong>Nested Loop × high row counts:</strong> planner expects few rows but gets thousands — usually stats or type mismatch (<code>int</code> vs <code>bigint</code>, or casting away the index with functions like <code>WHERE lower(email) = ...</code>)</li>
+                <li><strong>Sort node on large input:</strong> extend the index to cover ORDER BY</li>
+            </ul>
+
+            <h3>The over-indexing penalty</h3>
+            <ul>
+                <li>Every index must be updated per write: 12 indexes on a hot table ≈ up to 13x write amplification on the indexed columns</li>
+                <li>Bulk loads slow down dramatically — drop indexes before big migrations, rebuild after</li>
+                <li>Find unused indexes after 30 days of stats: <code>pg_stat_user_indexes</code> where <code>idx_scan = 0</code> — drop them</li>
+            </ul>
+        </section>
+
+        <section id="query-optimization" class="container">
+            <h2>Query Optimization: The Cheapest Scaling There Is</h2>
+            <p class="answer-block"><strong>Kill the N+1, stop using SELECT *, and replace OFFSET pagination past page ~10 with keyset (cursor) pagination.</strong> These three fixes routinely cut database load by 5–10x without touching infrastructure.</p>
+
+            <h3>The N+1 problem</h3>
+            <pre><code>// BAD: 1 query for posts + 1 query PER post for comments
+const posts = await db.post.findAll({ limit: 20 });
+for (const post of posts) {
+    post.comments = await db.comment.findAll({ where: { postId: post.id } });
+}
+// Total: 21 queries, ~21 x 3ms round trips = 63ms+ network alone
+
+// FIX 1: eager loading (join or two-query strategy)
+const posts = await db.post.findAll({
+    limit: 20,
+    include: [db.comment],   // ORM issues 2 queries total, joins in memory
+});
+
+// FIX 2: manual batch IN — often faster than a giant JOIN
+const ids = posts.map(p => p.id);
+const comments = await db.comment.findAll({ where: { postId: { [Op.in]: ids } } });
+// Then group comments by postId in application code</code></pre>
+
+            <p>Detect N+1s: log all SQL in dev, alert on any request issuing &gt; 20 similar queries. Most ORMs have a built-in counter (<code>ActiveRecord::Base.connection</code> queries, Django <code>AssertNumQueries</code>, Sequelize logging).</p>
+
+            <h3>Why SELECT * hurts</h3>
+            <ul>
+                <li>Drags every column across the wire including multi-KB text/JSONB blobs you never read</li>
+                <li>Defeats covering indexes — forces heap fetches even when an index could answer the query</li>
+                <li>Silently breaks when someone adds a column; breaks <code>PREPARE</code>d statement plan caching in some drivers</li>
+                <li>Selecting 5 of 30 columns typically cuts transfer and memory by 60%+ on wide tables</li>
+            </ul>
+
+            <h3>Pagination at depth: OFFSET collapses, keyset doesn't</h3>
+            <pre><code>-- OFFSET: reads and discards all skipped rows.
+-- Page 5000 (OFFSET 100000): scans 100K+ rows to return 20. ~800ms.
+SELECT * FROM feed_posts ORDER BY created_at DESC LIMIT 20 OFFSET 100000;
+
+-- Keyset/cursor: jumps straight into the index. Constant ~2ms at any depth.
+-- Cursor encodes (created_at, id) of the last item on the current page.
+SELECT * FROM feed_posts
+WHERE (created_at, id) < ('2026-08-01T10:00:00Z', '987654')
+ORDER BY created_at DESC, id DESC
+LIMIT 20;</code></pre>
+
+            <table style="width:100%; border-collapse:collapse; margin:16px 0; color:#cbd5e1;">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--border);">
+                        <th style="text-align:left; padding:8px;">Approach</th>
+                        <th style="text-align:left; padding:8px;">Latency @ Page 5000</th>
+                        <th style="text-align:left; padding:8px;">Random Jump?</th>
+                        <th style="text-align:left; padding:8px;">Use When</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">OFFSET/LIMIT</td><td style="padding:8px;">~800ms (linear growth)</td><td style="padding:8px;">Yes</td><td style="padding:8px;">First pages only, admin tables, small result sets</td></tr>
+                    <tr><td style="padding:8px;">Keyset (cursor)</td><td style="padding:8px;">~2ms (constant)</td><td style="padding:8px;">No (infinite scroll friendly)</td><td style="padding:8px;">Feeds, timelines, APIs, anything paginated deeply</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="read-replicas" class="container">
+            <h2>Read Replicas: Cheap Reads, With Strings Attached</h2>
+            <p class="answer-block"><strong>Replicas multiply read throughput but lag the primary by anywhere from 10ms to tens of seconds under load.</strong> Any feature reading its own writes must be pinned to the primary or use version tokens — otherwise you ship the classic "I posted a comment and it disappeared" bug.</p>
+
+            <h3>What replication actually gives you</h3>
+            <ul>
+                <li>Streaming replication (Postgres): replica applies WAL with typical lag of <strong>50ms–2s</strong>; under heavy bulk writes it can spike to 30s+</li>
+                <li>Route ~80–90% of traffic (dashboards, feeds, search) to replicas; keep writes and read-after-write paths on primary</li>
+                <li>Replicas also fail independently — a long analytical query on a replica no longer blocks OLTP writes</li>
+                <li>They do NOT help if the load is one hot row (counter updates, flash-sale inventory): all writes still serialize on the primary</li>
+            </ul>
+
+            <h3>Read-your-writes: session pinning</h3>
+            <pre><code>// After any write, pin subsequent reads in this session to the primary
+// for a window longer than observed max lag (e.g., 3s).
+class RoutingDataSource {
+    async execute(req, queryFn) {
+        const pinned = req.session.pinnedUntil > Date.now();
+        const target = pinned ? this.primary : this.replicaPool.random();
+        return queryFn(target);
+    }
+}
+// Set session.pinnedUntil = Date.now() + 3000 immediately after any UPDATE/INSERT.</code></pre>
+
+            <h3>Version tokens: precise, less wasteful</h3>
+            <pre><code>// Client sends X-Version-Token header it got back with its last write.
+// Token carries the primary's LSN/watermark at write time.
+
+app.get('/api/posts/:id', async (req, res) => {
+    const token = req.headers['x-version-token'];
+    if (token && !replicaCaughtUpTo(token)) {
+        // Replica hasn't applied this write yet — fail over to primary.
+        return queryPrimary(req.params.id);
+    }
+    return queryReplica(req.params.id);
+});</code></pre>
+
+            <h3>When replicas don't help</h3>
+            <ul>
+                <li><strong>Single hot row:</strong> 5K increments/sec on one counter row — replicas replicate the contention too. Fix with in-memory counters flushed periodically or sharded counters (row split into N sub-counters)</li>
+                <li><strong>Write-heavy workload:</strong> 80% writes means replicas mostly idle-wait on WAL</li>
+                <li><strong>Lag-sensitive features:</strong> inventory availability, balances — treat as primary-only or redesign around eventual consistency explicitly</li>
+            </ul>
+        </section>
+
+        <section id="caching" class="container">
+            <h2>Caching Layers: The Biggest Win and the Classic Trap</h2>
+            <p class="answer-block"><strong>A well-placed cache converts a 50ms DB query into a ~1ms Redis GET — but only invalidation is hard.</strong> Cache immutable-ish data aggressively with TTLs, invalidate event-driven on writes, and always guard hot keys against stampedes with locks or probabilistic early refresh.</p>
+
+            <h3>Redis vs Memcached</h3>
+            <table style="width:100%; border-collapse:collapse; margin:16px 0; color:#cbd5e1;">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--border);">
+                        <th style="text-align:left; padding:8px;"></th>
+                        <th style="text-align:left; padding:8px;">Redis</th>
+                        <th style="text-align:left; padding:8px;">Memcached</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Data structures</td><td style="padding:8px;">Strings, hashes, sets, sorted sets, streams</td><td style="padding:8px;">Strings only</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Persistence / replication</td><td style="padding:8px;">RDB/AOF, replicas, failover</td><td style="padding:8px;">None (pure L1-style cache)</td></tr>
+                    <tr><td style="padding:8px;">Pick it when</td><td style="padding:8px;">Need sorted sets (leaderboards), pub/sub, counters, durability</td><td style="padding:8px;">Simple string cache, multithreaded, dead-simple ops</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Invalidation strategies</h3>
+            <ul>
+                <li><strong>TTL only:</strong> simplest; staleness bounded by TTL (e.g., 300s). Fine for product pages, wrong for permissions/balances</li>
+                <li><strong>Write-through:</strong> update DB and cache in the same operation; reads never miss, writes pay the cache tax. Good when reads vastly outnumber writes (&gt; 10:1)</li>
+                <li><strong>Event-based:</strong> DB commit publishes <code>user.updated:{id}</code>; consumers delete keys. Correctness without coupling; needs outbox/CDC plumbing</li>
+            </ul>
+
+            <h3>Cache stampede protection (mutex/lock pattern)</h3>
+            <pre><code>async function getWithStampedeProtection(key, ttlSec, loader) {
+    let value = await redis.get(key);
+    if (value) return JSON.parse(value);
+
+    // Try to acquire a short-lived lock so ONE worker rebuilds the key
+    const lockKey = `lock:${key}`;
+    const acquired = await redis.set(lockKey, workerId, 'NX', 'EX', 10);
+    if (!acquired) {
+        // Someone else is rebuilding: briefly poll instead of hammering the DB
+        for (let i = 0; i < 20; i++) {
+            await sleep(50);
+            value = await redis.get(key);
+            if (value) return JSON.parse(value);
+        }
+        throw new Error('cache_rebuild_timeout');
+    }
+
+    try {
+        value = await loader();                       // expensive DB call, once
+        await redis.set(key, JSON.stringify(value), 'EX', ttlSec);
+        return value;
+    } finally {
+        await redis.del(lockKey);
+    }
+}
+
+// Belt-and-braces extras:
+// - Stale-while-revalidate: serve slightly-stale copy while rebuilding
+// - Probabilistic early expiry (XFetch): refresh before TTL as popularity grows</code></pre>
+
+            <h3>Hit-rate math: why 95% is the magic neighborhood</h3>
+            <p>If a DB query costs ~50ms and a cache hit ~1ms, average latency = <code>(hitRate × 1ms) + ((1 − hitRate) × 50ms)</code>.</p>
+            <table style="width:100%; border-collapse:collapse; margin:16px 0; color:#cbd5e1;">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--border);">
+                        <th style="text-align:left; padding:8px;">Hit Rate</th>
+                        <th style="text-align:left; padding:8px;">Avg Latency</th>
+                        <th style="text-align:left; padding:8px;">DB Load vs No Cache</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">80%</td><td style="padding:8px;">10.2ms</td><td style="padding:8px;">20%</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">90%</td><td style="padding:8px;">5.9ms</td><td style="padding:8px;">10%</td></tr>
+                    <tr><td style="padding:8px;">98%</td><td style="padding:8px;">2.0ms</td><td style="padding:8px;">2%</td></tr>
+                </tbody>
+            </table>
+            <p>Going 80%→90% halves latency; going 90%→95% halves DB load again. Chasing the last 3% usually means caching low-value long-tail keys — watch hit rate per key-class, not just global.</p>
+        </section>
+
+        <section id="connection-pooling" class="container">
+            <h2>Connection Pooling &amp; Limits</h2>
+            <p class="answer-block"><strong>Databases are not web servers: every connection is a process/thread costing roughly 1–10MB RAM, and context-switching above a few hundred active connections degrades everyone.</strong> Put a pooler in front, size pools small (cores × 2 is the classic starting point), and never let app servers open connections per request.</p>
+
+            <h3>Why max_connections kills you</h3>
+            <ul>
+                <li>Postgres default <code>max_connections = 100</code>; each backend is an OS process (~2–10MB, plus work_mem per sort/hash)</li>
+                <li>40 app pods × 20 connections = 800 demanded vs 100 available → "sorry, too many clients already" during deploys</li>
+                <li>Even raising the limit fails: 1,000 active Postgres backends spend more time context-switching than querying — throughput DROPS as connections rise</li>
+            </ul>
+
+            <h3>PgBouncer modes</h3>
+            <table style="width:100%; border-collapse:collapse; margin:16px 0; color:#cbd5e1;">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--border);">
+                        <th style="text-align:left; padding:8px;">Mode</th>
+                        <th style="text-align:left; padding:8px;">Server Conn Assigned</th>
+                        <th style="text-align:left; padding:8px;">Constraints</th>
+                        <th style="text-align:left; padding:8px;">Verdict</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Session</td><td style="padding:8px;">For the client's whole session</td><td style="padding:8px;">No reuse between requests; little savings</td><td style="padding:8px;">Avoid</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Transaction</td><td style="padding:8px;">Per transaction</td><td style="padding:8px;">No session state: no prepared statements (pre-1.21), no SET/ LISTEN, no advisory locks spanning txns</td><td style="padding:8px;">Default choice — 10–100x connection multiplexing</td></tr>
+                    <tr><td style="padding:8px;">Statement</td><td style="padding:8px;">Per statement</td><td style="padding:8px;">Multi-statement transactions forbidden outright</td><td style="padding:8px;">Only for stateless read APIs</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Sizing guidance</h3>
+            <pre><code># Pool size heuristic (HikariCP formula, works for most OLTP):
+pool_size ≈ cores * 2 + effective_spindle_count
+
+# Modern SSD/NVMe boxes: cores * 2 is a fine start.
+# 8-core DB -> pool of ~16-20 ACTIVE server connections. That's it.
+
+# PgBouncer transaction mode:
+[databases]
+mydb = host=127.0.0.1 port=5432 dbname=mydb
+
+[pgbouncer]
+pool_mode = transaction
+default_pool_size = 20          ; real server connections
+max_client_conn = 2000          ; cheap client-side slots
+reserve_pool_size = 5
+server_idle_timeout = 60
+
+# Verify saturation before growing:
+# SELECT state, count(*) FROM pg_stat_activity GROUP BY state;
+# If 'active' rarely hits default_pool_size, the pool is NOT the bottleneck.</code></pre>
+
+            <ul>
+                <li>App-side pools (HikariCP, pgx pool, Sequelize pool) should be sized so <code>pods × appPoolSize ≤ max_client_conn</code>, not ≤ DB connections</li>
+                <li>Add <code>acquireTimeout</code>/queue limits — a bounded wait with fast failure beats a 30s hang</li>
+                <li>Watch <code>pgbouncer_stats</code>: <code>cl_waiting</code> &gt; 0 sustained means raise <code>default_pool_size</code> or (better) reduce query time</li>
+            </ul>
+        </section>
+
+        <section id="vertical-horizontal" class="container">
+            <h2>Vertical vs Horizontal: Bigger Box Is Underrated</h2>
+            <p class="answer-block"><strong>Until roughly 64 vCPUs / 512GB+ RAM / NVMe storage, a bigger single instance beats distribution on every axis except fault tolerance.</strong> Scale vertically as far as the budget allows; split only when writes exceed what one machine commits durably — that's around 10K–30K durable transactions/sec on modern cloud hardware for Postgres-class databases.</p>
+
+            <h3>When the bigger box wins</h3>
+            <ul>
+                <li><strong>No distributed complexity:</strong> joins, foreign keys, transactions, backups all keep working exactly as documented</li>
+                <li><strong>RAM absorbs the working set:</strong> hot data fully cached means disk latency leaves the equation entirely — p99 drops 10–50x</li>
+                <li><strong>One knob:</strong> resize takes minutes on managed platforms; sharding migrations take quarters</li>
+                <li><strong>Cheaper per unit of throughput</strong> than operating a fleet plus its coordination layer</li>
+            </ul>
+
+            <h3>Realistic ceilings (single instance, cloud NVMe, ballpark)</h3>
+            <table style="width:100%; border-collapse:collapse; margin:16px 0; color:#cbd5e1;">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--border);">
+                        <th style="text-align:left; padding:8px;">Resource</th>
+                        <th style="text-align:left; padding:8px;">Comfortable Ceiling</th>
+                        <th style="text-align:left; padding:8px;">Hard Wall</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">RAM (working set)</td><td style="padding:8px;">256–512GB</td><td style="padding:8px;">Instance family max (~6–24TB on bare metal)</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Durable writes</td><td style="padding:8px;">5K–20K TPS</td><td style="padding:8px;">WAL/fsync throughput: ~30K–50K small commits/sec</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Read QPS (indexed, cached)</td><td style="padding:8px;">50K–150K with replicas</td><td style="padding:8px;">CPU: ~200K+ simple point selects/sec/core-cluster</td></tr>
+                    <tr><td style="padding:8px;">Table size (with good indexes)</td><td style="padding:8px;">1–3TB, billions of rows</td><td style="padding:8px;">Maintenance windows: VACUUM/reindex/rebuild-replica times become days</td></tr>
+                </tbody>
+            </table>
+
+            <h3>The point where you actually must split</h3>
+            <ul>
+                <li>Writes exceed one machine's durable commit rate and batching/debouncing can't shave them below it</li>
+                <li>Maintenance operations (vacuum, backup restore, major-version upgrade) exceed your acceptable downtime window</li>
+                <li>Failure blast radius is unacceptable: one region outage taking down ALL customers is a business decision, not just technical</li>
+            </ul>
+        </section>
+
+        <section id="partitioning-sharding" class="container">
+            <h2>Partitioning &amp; Sharding: Know the Difference</h2>
+            <p class="answer-block"><strong>Partitioning splits one table inside one instance (zero-downtime, transparent to queries); sharding splits data across many machines (real distribution, real pain).</strong> Exhaust partitioning first — it solves maintenance and prune-scan problems without touching your consistency model.</p>
+
+            <h3>Partitioning: within one instance</h3>
+            <pre><code>-- Range partitioning by month: the workhorse
+CREATE TABLE events (
+    id BIGINT GENERATED ALWAYS AS IDENTITY,
+    user_id BIGINT NOT NULL,
+    payload JSONB,
+    created_at TIMESTAMPTZ NOT NULL
+) PARTITION BY RANGE (created_at);
+
+CREATE TABLE events_2026_07 PARTITION OF events
+    FOR VALUES FROM ('2026-07-01') TO ('2026-08-01');
+CREATE TABLE events_2026_08 PARTITION OF events
+    FOR VALUES FROM ('2026-08-01') TO ('2026-09-01');
+
+-- Queries with a date filter prune to 1 partition instead of scanning years.
+-- Dropping old data = DROP TABLE events_2026_07 (instant, no DELETE bloat).
+-- Other schemes: LIST (region, tenant_tier), HASH (even spread by user_id).</code></pre>
+
+            <h3>Sharding: across instances</h3>
+            <p>Each shard owns a disjoint slice of rows and runs on its own machine. The router maps each query to shard(s) via the shard key.</p>
+
+            <h3>Shard key selection rules</h3>
+            <ul>
+                <li><strong>High cardinality:</strong> user_id (millions of values), not country (195 values) or tenant where one tenant might hold 40% of rows</li>
+                <li><strong>Even distribution:</strong> hash(user_id), not raw timestamps (every write hits "today's" shard) and not monotonically increasing IDs</li>
+                <li><strong>Query isolation:</strong> nearly every query must include the key. If 30% of queries lack it, those fan out to all shards — your p99 becomes your worst shard</li>
+                <li><strong>Co-locate related data:</strong> orders, payments, and notifications keyed by user_id live on the same shard → single-shard transactions still work</li>
+            </ul>
+
+            <h3>Resharding pain (why choosing right the first time matters)</h3>
+            <pre><code>// Resharding = double-write + backfill + dual-read + cutover.
+// Typical timeline for a 2TB dataset: 2-4 months of engineering.
+
+// Phase 1: dual-write to old + new layout (new one may lag; tolerate)
+await legacyDb.write(row);
+await newShardMap.write(row).catch(logDualWriteFailure); // never block prod
+
+// Phase 2: backfill historical rows chunk-by-chunk (batch 1K rows/sec)
+
+// Phase 3: dual-read with comparison (read old, read new, diff, alert)
+// Phase 4: flip reads to new, keep writes mirrored for rollback window
+// Phase 5: stop legacy writes; retire old tables</code></pre>
+
+            <h3>Avoid cross-shard transactions</h3>
+            <ul>
+                <li>Design entities so one user's data lands on one shard (co-location)</li>
+                <li>Where impossible, use sagas/outbox patterns instead of 2PC — see <a href="../backend-architecture-patterns/">the Saga pattern guide</a></li>
+                <li>Global uniqueness: don't rely on auto-increment; use UUIDv7 or snowflake IDs (timestamp-prefix sortable)</li>
+                <li>Cross-shard queries (analytics, admin search) belong in a replica/warehouse path, not OLTP shards</li>
+            </ul>
+
+            <h3>Checklist: signs you ACTUALLY need sharding</h3>
+            <ul>
+                <li>☐ Write TPS exceeds ~10K–30K durable commits/sec on the largest instance you're willing to run</li>
+                <li>☐ Data volume makes maintenance (backup, vacuum, version upgrade) exceed operational windows</li>
+                <li>☐ You've exhausted: indexes, replicas, caching (≥95% hit rate), partitioning, archiving</li>
+                <li>☐ Multi-tenant isolation requirements demand physical separation (compliance, noisy neighbors)</li>
+                <li>☐ You can name your shard key AND ≥90% of hot queries include it</li>
+                <li>☐ You have (or will hire) engineers to own routing, rebalancing, and per-shard monitoring</li>
+            </ul>
+        </section>
+
+        <section id="sql-nosql" class="container">
+            <h2>SQL vs NoSQL: Decision Framework, Not Hype</h2>
+            <p class="answer-block"><strong>Choose by access pattern and integrity requirements, not benchmarks or fashion.</strong> Relational databases handle far more scale than their reputation suggests — Postgres happily serves millions of users — while document stores win on flexible schemas and known-key access. Many mature stacks end up polyglot: one source-of-truth relational DB plus purpose-built stores at the edges.</p>
+
+            <table style="width:100%; border-collapse:collapse; margin:16px 0; color:#cbd5e1;">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--border);">
+                        <th style="text-align:left; padding:8px;">Your Access Pattern</th>
+                        <th style="text-align:left; padding:8px;">Fit</th>
+                        <th style="text-align:left; padding:8px;">Why</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Relational integrity matters: money, inventory, orders, multi-entity transactions</td><td style="padding:8px;"><strong>SQL (Postgres/MySQL)</strong></td><td style="padding:8px;">ACID transactions, FK constraints, unique constraints enforce correctness at the storage layer</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Flexible/evolving schema, entity-per-document access ("get product by ID")</td><td style="padding:8px;"><strong>Document (MongoDB/DynamoDB/Firestore)</strong></td><td style="padding:8px;">No joins needed if the aggregate is fetched whole; schema changes are data changes</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Known query patterns only, massive key-value scale (sessions, carts, profiles)</td><td style="padding:8px;"><strong>Wide-column/KV (DynamoDB, Cassandra)</strong></td><td style="padding:8px;">Predictable single-digit-ms at any scale; but design tables per query upfront — ad-hoc queries don't exist</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Heavy aggregation/analytics over append-only events</td><td style="padding:8px;"><strong>Columnar (ClickHouse/BigQuery/Snowflake)</strong></td><td style="padding:8px;">Column compression + vectorized scans: 10–100x faster aggregations than row stores</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Full-text search, fuzzy matching, faceting</td><td style="padding:8px;"><strong>Search engine (Elasticsearch/OpenSearch)</strong></td><td style="padding:8px;">Inverted indexes; not a system of record — sync from primary DB</td></tr>
+                    <tr><td style="padding:8px;">Deep relationships/traversals (social graphs, fraud rings)</td><td style="padding:8px;"><strong>Graph (Neo4j)</strong> or recursive CTEs in SQL</td><td style="padding:8px;">Variable-depth traversals; shallow ones (depth ≤ 3) are fine with SQL CTEs</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Polyglot persistence reality check</h3>
+            <ul>
+                <li>Every additional store = another failure mode, backup story, security audit, and on-call mental model</li>
+                <li>The common winning shape: <strong>Postgres as source of truth</strong> → CDC (Debezium/logical replication) → derived stores (search index, analytics warehouse, cache)</li>
+                <li>"NoSQL scales better" is mostly obsolete folklore: Postgres with Citus/Vitess-style sharding, or managed equivalents, covers most NoSQL headline numbers</li>
+                <li>Default answer for a new product: relational + Redis. Deviate when a concrete access pattern proves the default wrong</li>
+            </ul>
+        </section>
+
+        <section id="cost" class="container">
+            <h2>Cost Optimization: Scaling Without Burning Money</h2>
+            <p class="answer-block"><strong>The biggest database cost lever isn't instance size — it's not storing or querying data you don't need hot.</strong> Tier storage, archive cold data, and match managed tiers to workload shape. Numbers below are ballpark cloud pricing (AWS RDS/GCP Cloud SQL class, mid-2026) — treat as ±30% and check current rates.</p>
+
+            <h3>Managed DB tiers (ballpark, monthly)</h3>
+            <table style="width:100%; border-collapse:collapse; margin:16px 0; color:#cbd5e1;">
+                <thead>
+                    <tr style="border-bottom:1px solid var(--border);">
+                        <th style="text-align:left; padding:8px;">Tier</th>
+                        <th style="text-align:left; padding:8px;">Typical Spec</th>
+                        <th style="text-align:left; padding:8px;">Ballpark Cost/Mo</th>
+                        <th style="text-align:left; padding:8px;">Right For</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Burstable/small</td><td style="padding:8px;">2 vCPU, 8GB, gp3</td><td style="padding:8px;">$100–200</td><td style="padding:8px;">&lt; 10K users, dev/staging</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">General purpose</td><td style="padding:8px;">8 vCPU, 32GB, NVMe/gp3</td><td style="padding:8px;">$500–900</td><td style="padding:8px;">Most production apps to ~1M users</td></tr>
+                    <tr style="border-bottom:1px solid var(--border);"><td style="padding:8px;">Memory-optimized</td><td style="padding:8px;">16–32 vCPU, 128–256GB</td><td style="padding:8px;">$2K–5K</td><td style="padding:8px;">Large working set, 1M–10M users</td></tr>
+                    <tr><td style="padding:8px;">Serverless (Aurora Serverless v2 class)</td><td style="padding:8px;">Scales 0.5–128 ACU</td><td style="padding:8px;">Usage-based; ~$0.12/ACU-hr</td><td style="padding:8px;">Spiky/idle-heavy traffic, dev — NOT steady high load (often pricier there)</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Storage tiering &amp; cold archival</h3>
+            <ul>
+                <li><strong>Hot (NVMe/gp3):</strong> last 30–90 days, ~$0.10–0.19/GB-mo — everything users touch daily</li>
+                <li><strong>Cool (object storage):</strong> 90–365 days, ~$0.02/GB-mo — export monthly partitions to Parquet; query via Athena/Spectrum only when needed</li>
+                <li><strong>Cold/archive:</strong> 1yr+, ~$0.004/GB-mo (Glacier Deep Archive class) — compliance dumps, restore in hours; accept it</li>
+                <li>Tiering a 2TB events table (90% cold) saves roughly $350/mo in storage AND keeps VACUUM/backups fast — the speed win often outweighs the dollar win</li>
+                <li>Right-size reserved/savings plans once usage is stable 60+ days: 30–40% off committed compute</li>
+            </ul>
+
+            <pre><code>-- Find the tables worth archiving (Postgres):
+SELECT relname AS table,
+       pg_size_pretty(pg_total_relation_size(relid)) AS total_size,
+       n_live_tup AS rows
+FROM pg_stat_user_tables
+ORDER BY pg_total_relation_size(relid) DESC
+LIMIT 10;
+-- Anything &gt; 50GB with append-only semantics is an archiving candidate.</code></pre>
+
+            <ul>
+                <li>Delete test/debug data and orphaned rows on schedule; bloat inflates every downstream cost</li>
+                <li>Compress: TOAST-aware column types (Postgres <code>COMPRESSION lz4</code>), or move large blobs to S3 and store URLs — DB rows shrink 10–100x</li>
+                <li>Cross-region read replicas double-to-triple cost; confirm someone actually uses them before standing them up</li>
+            </ul>
+        </section>
+
+        <section class="container guide-cta">
+            <h2>Continue Learning</h2>
+            <p>Scaling the database is one layer. Pair it with API design discipline and a structured growth path as a backend engineer.</p>
+            <div class="hero-buttons">
+                <a href="../api-design-best-practices/" class="btn btn-primary">API Design Best Practices →</a>
+                <a href="../backend-developer-roadmap/" class="btn btn-secondary">Backend Developer Roadmap →</a>
+                <a href="../../index.html#contact" class="btn btn-secondary">Get in Touch →</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Amit Kumar. <a href="../../index.html">&#8592; Back to Portfolio</a></p>
+        </div>
+    </footer>
+    <script src="../../script.js"></script>
+</body>
+</html>

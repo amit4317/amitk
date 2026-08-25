@@ -10,14 +10,20 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DocGen Studio | Chrome extension for SaaS how-to guides</title>
-    <meta name="description" content="DocGen Studio records clicks, captures annotated screenshots, and turns a live product walkthrough into a step-by-step SaaS guide. Export PDF or Markdown.">
+    <link rel="alternate" hreflang="en" href="https://amitk.pages.dev/docgen-studio/" />
+    <link rel="alternate" hreflang="x-default" href="https://amitk.pages.dev/docgen-studio/" />
+    <title>DocGen Studio — Free Chrome Extension for SaaS How-To Guides (PDF + Markdown)</title>
+    <meta name="description" content="DocGen Studio: Free Chrome extension that records clicks, captures annotated screenshots, and exports SaaS how-to guides as PDF or Markdown. Local-first, no account required, optional OpenRouter AI. Install in 30 seconds.">
     <link rel="canonical" href="https://amitk.pages.dev/docgen-studio/">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="DocGen Studio">
-    <meta property="og:description" content="Record clicks, annotate screenshots, and export SaaS how-to guides as PDF or Markdown.">
+    <meta property="og:title" content="DocGen Studio — Free Chrome Extension for SaaS How-To Guides">
+    <meta property="og:description" content="Record clicks, annotate screenshots, export PDF/Markdown. Local-first, optional OpenRouter AI. Free forever.">
     <meta property="og:url" content="https://amitk.pages.dev/docgen-studio/">
     <meta property="og:image" content="https://amitk.pages.dev/docgen-studio/promo.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="DocGen Studio — Free Chrome Extension for SaaS How-To Guides">
+    <meta name="twitter:description" content="Free Chrome extension for automated SaaS documentation. Click recording, annotated screenshots, PDF/Markdown export.">
+    <meta name="twitter:image" content="https://amitk.pages.dev/docgen-studio/promo.png">
     <link rel="icon" href="icon.png">
     <link rel="stylesheet" href="../styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -31,16 +37,44 @@
           "name": "DocGen Studio",
           "applicationCategory": "BrowserApplication",
           "operatingSystem": "Chrome",
-          "description": "Chrome extension that records clicks, captures annotated screenshots, and exports SaaS how-to guides as PDF or Markdown.",
+          "description": "Free Chrome extension that records clicks, captures annotated screenshots, and exports SaaS how-to guides as PDF or Markdown. Local-first, no account required, optional OpenRouter AI.",
           "url": "https://amitk.pages.dev/docgen-studio/",
-          "sameAs": ["https://amitk.pages.dev/docgen-studio/how-to-use.html"],
-          "author": {"@type": "Person", "name": "Amit Kumar"}
+          "sameAs": [
+            "https://amitk.pages.dev/docgen-studio/how-to-use.html",
+            "https://amitk.pages.dev/docgen-studio/privacy.html"
+          ],
+          "author": {"@type": "Person", "name": "Amit Kumar", "url": "https://amitk.pages.dev/"},
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock",
+            "description": "Free to use. Optional OpenRouter API key for AI-assisted drafting."
+          },
+          "featureList": [
+            "Click recording with annotated screenshots",
+            "PDF and Markdown export",
+            "Optional AI-assisted drafting via OpenRouter",
+            "Focused crop (60%) for dense UIs",
+            "Local-first: no data leaves your device",
+            "No account required"
+          ]
         },
         {
           "@type": "BreadcrumbList",
           "itemListElement": [
             {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://amitk.pages.dev/"},
             {"@type": "ListItem", "position": 2, "name": "DocGen Studio", "item": "https://amitk.pages.dev/docgen-studio/"}
+          ]
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {"@type": "Question", "name": "Is DocGen Studio free?", "acceptedAnswer": {"@type": "Answer", "text": "Yes, DocGen Studio is completely free. No subscription, no account required. Optional OpenRouter API key enables AI-assisted drafting."}},
+            {"@type": "Question", "name": "What browsers does DocGen Studio support?", "acceptedAnswer": {"@type": "Answer", "text": "DocGen Studio is a Chrome extension. It works on Chrome, Edge, Brave, and other Chromium-based browsers."}},
+            {"@type": "Question", "name": "Does DocGen Studio send my data anywhere?", "acceptedAnswer": {"@type": "Answer", "text": "No. All recording, screenshots, and editing happen locally in your browser. Only click labels are sent to OpenRouter if you add an API key. Screenshots never leave your device."}},
+            {"@type": "Question", "name": "Can I export both PDF and Markdown?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Export Markdown for version control (GitHub, Notion) or PDF for sharing with non-technical stakeholders."}},
+            {"@type": "Question", "name": "How does DocGen Studio differ from Scribe or Guidde?", "acceptedAnswer": {"@type": "Answer", "text": "DocGen Studio is free, local-first, developer-focused, and lets you bring your own OpenRouter API key. No cloud dependency, no per-seat pricing, full control over your data."}}
           ]
         }
       ]
@@ -69,14 +103,15 @@
             <div class="container product-hero-grid">
                 <div>
                     <img class="product-icon" src="icon.png" width="72" height="72" alt="DocGen Studio icon">
-                    <p class="product-kicker">Chrome extension</p>
+                    <p class="product-kicker">Free Chrome Extension</p>
                     <h1 class="hero-title">DocGen Studio</h1>
-                    <p class="hero-subtitle">Turn a live walkthrough into a shippable how-to guide</p>
-                    <p class="hero-description">Record clicks on any site, capture annotated screenshots, then export a step-by-step SaaS guide as PDF or Markdown. Optional AI drafts titles and steps from click labels using your own OpenRouter key.</p>
+                    <p class="hero-subtitle">Turn a live walkthrough into a shippable how-to guide in minutes</p>
+                    <p class="hero-description answer-block"><strong>DocGen Studio is a free, local-first Chrome extension that records your clicks, captures annotated screenshots, and exports step-by-step SaaS guides as PDF or Markdown.</strong> No account, no cloud, no subscription. Optional AI-assisted drafting via your own OpenRouter key.</p>
                     <div class="hero-buttons">
-                        <a href="how-to-use.html" class="btn btn-primary">How to use</a>
+                        <a href="how-to-use.html" class="btn btn-primary">How to use (8 min guide)</a>
                         <a href="#how" class="btn btn-secondary">See how it works</a>
                     </div>
+                    <p style="margin-top:12px; color: var(--muted); font-size: 14px;"><strong>Free forever · No signup · Local-first · BYO OpenRouter key</strong></p>
                 </div>
                 <img src="promo.png" width="440" height="280" alt="DocGen Studio promo: record, annotate, export">
             </div>
@@ -84,22 +119,29 @@
 
         <section id="how">
             <div class="container">
-                <h2 class="section-title">How it works</h2>
+                <h2 class="section-title">How it works — 3 steps, ~8 minutes</h2>
+                <p class="answer-block"><strong>Pin the extension, click through your product, export a guide.</strong> No staging screenshots, no design tools, no manual writing. Each step below links to the detailed guide with screenshots.</p>
                 <div class="steps-grid">
-                    <article class="step-card">
+                    <article class="step-card" itemscope itemtype="https://schema.org/HowToStep">
+                        <meta itemprop="position" content="1">
                         <p class="step-num">01</p>
-                        <h3>Record</h3>
-                        <p>Start recording, then click through the product the way a customer would. Each click is captured, including after in-page navigation.</p>
+                        <h3 itemprop="name">Record your walkthrough</h3>
+                        <p itemprop="text"><strong>Click Start Recording, then use your product naturally.</strong> Every click is captured — even across page navigation. The REC badge confirms capture is active.</p>
+                        <a href="how-to-use.html#step-3-record" class="project-link" style="margin-top:8px; display:inline-block;">See recording in guide →</a>
                     </article>
-                    <article class="step-card">
+                    <article class="step-card" itemscope itemtype="https://schema.org/HowToStep">
+                        <meta itemprop="position" content="2">
                         <p class="step-num">02</p>
-                        <h3>Annotate</h3>
-                        <p>Every step gets a screenshot with a thick highlight, label, and arrow on the control you used. Crop around the click or keep the full tab.</p>
+                        <h3 itemprop="name">Edit & annotate</h3>
+                        <p itemprop="text"><strong>Each step gets an auto-annotated screenshot with arrow and label.</strong> Rewrite titles, add context, reorder steps, delete noise. Optional AI drafts copy from click labels.</p>
+                        <a href="how-to-use.html#step-5-edit" class="project-link" style="margin-top:8px; display:inline-block;">See editor in guide →</a>
                     </article>
-                    <article class="step-card">
+                    <article class="step-card" itemscope itemtype="https://schema.org/HowToStep">
+                        <meta itemprop="position" content="3">
                         <p class="step-num">03</p>
-                        <h3>Export</h3>
-                        <p>Edit titles, reorder or delete steps, then export a PDF or Markdown guide. Optional AI can draft the copy from click labels only.</p>
+                        <h3 itemprop="name">Export PDF or Markdown</h3>
+                        <p itemprop="text"><strong>One click exports a polished guide.</strong> Markdown for GitHub/Notion/docs-as-code. PDF for email, onboarding packets, print. Zero cloud dependency.</p>
+                        <a href="how-to-use.html#step-7-export" class="project-link" style="margin-top:8px; display:inline-block;">See export in guide →</a>
                     </article>
                 </div>
             </div>
@@ -108,24 +150,59 @@
         <section>
             <div class="container">
                 <h2 class="section-title">Built for documentation work</h2>
+                <p class="answer-block"><strong>Four high-leverage use cases where DocGen Studio replaces hours of manual work with minutes of recording.</strong></p>
                 <div class="feature-grid">
                     <article class="feature-card">
                         <h3>Help-center articles</h3>
-                        <p>Capture the real UI instead of restaging screenshots by hand.</p>
+                        <p><strong>Capture real UI instead of restaging screenshots.</strong> Record the actual flow, get annotated steps automatically, export to Markdown for your docs site.</p>
                     </article>
                     <article class="feature-card">
                         <h3>Internal SOPs</h3>
-                        <p>Record an onboarding path once and share a guide the next hire can follow.</p>
+                        <p><strong>Record an onboarding path once, share forever.</strong> New hires follow click-by-click guides. Update in minutes when UI changes.</p>
                     </article>
                     <article class="feature-card">
                         <h3>Support macros</h3>
-                        <p>Export annotated steps that show customers exactly where to click.</p>
+                        <p><strong>Export annotated steps showing exactly where to click.</strong> Reduce support ticket time. Customers follow visual guides instead of text-only replies.</p>
                     </article>
                     <article class="feature-card">
                         <h3>QA walkthroughs</h3>
-                        <p>Hand another teammate a click-by-click record of the flow you just tested.</p>
+                        <p><strong>Hand a teammate a click-by-click record of the flow you just tested.</strong> Reproducible steps, annotated evidence, no "works on my machine."</p>
                     </article>
                 </div>
+            </div>
+        </section>
+
+        <section id="compare" style="margin-top: 48px;">
+            <div class="container">
+                <h2 class="section-title">Why DocGen Studio over Scribe, Guidde, or Tango?</h2>
+                <p class="answer-block"><strong>DocGen Studio is the only free, local-first, developer-focused alternative.</strong> No per-seat pricing, no cloud lock-in, no mandatory AI credits. You own your data and your workflow.</p>
+                <div class="feature-grid">
+                    <article class="feature-card">
+                        <h3>Free forever</h3>
+                        <p>No subscription, no trial, no credit card. Scribe starts at $29/user/mo; Guidde at $16/user/mo.</p>
+                    </article>
+                    <article class="feature-card">
+                        <h3>Local-first privacy</h3>
+                        <p>Screenshots and recordings never leave your browser. Scribe/Guidde upload everything to their cloud.</p>
+                    </article>
+                    <article class="feature-card">
+                        <h3>BYO OpenRouter key</h3>
+                        <p>Use any model (including free tiers). No vendor AI markup. Scribe/Guidde bundle AI at premium.</p>
+                    </article>
+                    <article class="feature-card">
+                        <h3>Dual export: PDF + MD</h3>
+                        <p>Markdown for docs-as-code workflows. PDF for stakeholders. Most tools only do one.</p>
+                    </article>
+                    <article class="feature-card">
+                        <h3>Focused Crop (60%)</h3>
+                        <p>Auto-zoom on clicked element in dense UIs. Critical for complex dashboards where full-tab screenshots are unreadable.</p>
+                    </article>
+                    <article class="feature-card">
+                        <h3>No account required</h3>
+                        <p>Install and record immediately. No signup, no email, no team workspace to configure.</p>
+                    </article>
+                </div>
+                <p style="margin-top: 16px; text-align: center;"><a href="how-to-use.html" class="btn btn-secondary">See detailed comparison in the guide →</a></p>
             </div>
         </section>
 
