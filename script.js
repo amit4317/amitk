@@ -13,6 +13,37 @@ if (hamburger && navMenu) {
 	});
 }
 
+// Theme toggle
+const themeToggle = document.querySelector('.theme-toggle');
+const html = document.documentElement;
+
+function initTheme() {
+	const saved = localStorage.getItem('theme');
+	const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+	const theme = saved || (prefersLight ? 'light' : 'dark');
+	html.setAttribute('data-theme', theme);
+	updateThemeIcon(theme);
+}
+
+function updateThemeIcon(theme) {
+	if (!themeToggle) return;
+	const icon = themeToggle.querySelector('i');
+	if (!icon) return;
+	icon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+}
+
+if (themeToggle) {
+	themeToggle.addEventListener('click', () => {
+		const current = html.getAttribute('data-theme');
+		const next = current === 'light' ? 'dark' : 'light';
+		html.setAttribute('data-theme', next);
+		localStorage.setItem('theme', next);
+		updateThemeIcon(next);
+	});
+}
+
+initTheme();
+
 // Smooth scroll for internal links (fallback for browsers without CSS smooth scroll)
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 	anchor.addEventListener('click', function (e) {
@@ -22,6 +53,27 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 		if (!target) return;
 		e.preventDefault();
 		target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	});
+});
+
+// FAQ Accordion enhancements
+document.querySelectorAll('.faq-item').forEach(item => {
+	item.addEventListener('toggle', () => {
+		// Close other open items (optional: accordion behavior)
+		// Uncomment below for single-open accordion:
+		// document.querySelectorAll('.faq-item[open]').forEach(openItem => {
+		//     if (openItem !== item) openItem.open = false;
+		// });
+	});
+});
+
+// Keyboard support for FAQ items
+document.querySelectorAll('.faq-item summary').forEach(summary => {
+	summary.addEventListener('keydown', (e) => {
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault();
+			summary.click();
+		}
 	});
 });
 

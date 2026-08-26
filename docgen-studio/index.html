@@ -41,7 +41,8 @@
           "url": "https://amitk.pages.dev/docgen-studio/",
           "sameAs": [
             "https://amitk.pages.dev/docgen-studio/how-to-use.html",
-            "https://amitk.pages.dev/docgen-studio/privacy.html"
+            "https://amitk.pages.dev/docgen-studio/privacy.html",
+            "https://chromewebstore.google.com/detail/saas-documentation-genera/adnncfpfehlligmndggddoaagaafbhmo"
           ],
           "author": {"@type": "Person", "name": "Amit Kumar", "url": "https://amitk.pages.dev/"},
           "offers": {
@@ -58,6 +59,94 @@
             "Focused crop (60%) for dense UIs",
             "Local-first: no data leaves your device",
             "No account required"
+          ],
+          "installUrl": "https://chromewebstore.google.com/detail/saas-documentation-genera/adnncfpfehlligmndggddoaagaafbhmo",
+          "downloadUrl": "https://chromewebstore.google.com/detail/saas-documentation-genera/adnncfpfehlligmndggddoaagaafbhmo",
+          "browserRequirements": "Requires Chrome, Edge, Brave, or Chromium-based browser",
+          "permissions": "activeTab, scripting, downloads, storage",
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "reviewCount": "12",
+            "bestRating": "5",
+            "worstRating": "1"
+          }
+        },
+        {
+          "@type": "HowTo",
+          "name": "How to create a SaaS how-to guide with DocGen Studio",
+          "description": "Pin DocGen Studio in Chrome, optionally add an OpenRouter key, record clicks with annotated screenshots, edit the workflow in the editor, and export PDF or Markdown.",
+          "image": "https://amitk.pages.dev/docgen-studio/promo.png",
+          "totalTime": "PT8M",
+          "estimatedCost": {
+            "@type": "MonetaryAmount",
+            "currency": "USD",
+            "value": "0"
+          },
+          "tool": {
+            "@type": "SoftwareApplication",
+            "name": "DocGen Studio",
+            "applicationCategory": "BrowserApplication",
+            "operatingSystem": "Chrome",
+            "url": "https://amitk.pages.dev/docgen-studio/"
+          },
+          "step": [
+            {
+              "@type": "HowToStep",
+              "position": 1,
+              "name": "Pin DocGen Studio in Chrome",
+              "url": "https://amitk.pages.dev/docgen-studio/how-to-use.html#step-1-pin",
+              "image": "https://amitk.pages.dev/docgen-studio/guide/01-extensions.png",
+              "text": "Open the Chrome extensions puzzle menu, find DocGen Studio, and pin it to the toolbar."
+            },
+            {
+              "@type": "HowToStep",
+              "position": 2,
+              "name": "Add an OpenRouter API key (optional)",
+              "url": "https://amitk.pages.dev/docgen-studio/how-to-use.html#step-2-api",
+              "image": "https://amitk.pages.dev/docgen-studio/guide/03-api-saved.png",
+              "text": "Open AI API Settings, paste your OpenRouter key and model, then save. Skip this if you want local fallback text only."
+            },
+            {
+              "@type": "HowToStep",
+              "position": 3,
+              "name": "Start recording and confirm the REC badge",
+              "url": "https://amitk.pages.dev/docgen-studio/how-to-use.html#step-3-record",
+              "image": "https://amitk.pages.dev/docgen-studio/guide/04-recording.png",
+              "text": "Click Start Recording. The popup shows Recording in progress and the toolbar icon shows a REC badge."
+            },
+            {
+              "@type": "HowToStep",
+              "position": 4,
+              "name": "Click through the product, then stop and open the editor",
+              "url": "https://amitk.pages.dev/docgen-studio/how-to-use.html#step-4-stop",
+              "image": "https://amitk.pages.dev/docgen-studio/guide/05-rec-badge.png",
+              "text": "Use the site as a customer would. Each click is captured. Click Stop & Open Editor when finished."
+            },
+            {
+              "@type": "HowToStep",
+              "position": 5,
+              "name": "Wait for AI labels, then edit title, summary, and steps",
+              "url": "https://amitk.pages.dev/docgen-studio/how-to-use.html#step-5-edit",
+              "image": "https://amitk.pages.dev/docgen-studio/guide/07-editor.png",
+              "text": "The editor lists every workflow step. AI may fill titles and instructions. Rewrite anything before export."
+            },
+            {
+              "@type": "HowToStep",
+              "position": 6,
+              "name": "Choose Focused Crop or a full screenshot",
+              "url": "https://amitk.pages.dev/docgen-studio/how-to-use.html#step-6-crop",
+              "image": "https://amitk.pages.dev/docgen-studio/guide/12-focused-crop.png",
+              "text": "Turn on Focused Crop (60%) to zoom around the clicked control, or leave it off for the full visible tab."
+            },
+            {
+              "@type": "HowToStep",
+              "position": 7,
+              "name": "Export Markdown or PDF",
+              "url": "https://amitk.pages.dev/docgen-studio/how-to-use.html#step-7-export",
+              "image": "https://amitk.pages.dev/docgen-studio/guide/10-export-buttons.png",
+              "text": "Click Export Markdown for a .md file or Export PDF for a printable guide."
+            }
           ]
         },
         {
@@ -74,7 +163,11 @@
             {"@type": "Question", "name": "What browsers does DocGen Studio support?", "acceptedAnswer": {"@type": "Answer", "text": "DocGen Studio is a Chrome extension. It works on Chrome, Edge, Brave, and other Chromium-based browsers."}},
             {"@type": "Question", "name": "Does DocGen Studio send my data anywhere?", "acceptedAnswer": {"@type": "Answer", "text": "No. All recording, screenshots, and editing happen locally in your browser. Only click labels are sent to OpenRouter if you add an API key. Screenshots never leave your device."}},
             {"@type": "Question", "name": "Can I export both PDF and Markdown?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Export Markdown for version control (GitHub, Notion) or PDF for sharing with non-technical stakeholders."}},
-            {"@type": "Question", "name": "How does DocGen Studio differ from Scribe or Guidde?", "acceptedAnswer": {"@type": "Answer", "text": "DocGen Studio is free, local-first, developer-focused, and lets you bring your own OpenRouter API key. No cloud dependency, no per-seat pricing, full control over your data."}}
+            {"@type": "Question", "name": "How does DocGen Studio differ from Scribe or Guidde?", "acceptedAnswer": {"@type": "Answer", "text": "DocGen Studio is free, local-first, developer-focused, and lets you bring your own OpenRouter API key. No cloud dependency, no per-seat pricing, full control over your data."}},
+            {"@type": "Question", "name": "Does DocGen Studio require an account?", "acceptedAnswer": {"@type": "Answer", "text": "No. Install and record immediately. No signup, no email, no team workspace to configure."}},
+            {"@type": "Question", "name": "What is Focused Crop (60%)?", "acceptedAnswer": {"@type": "Answer", "text": "Focused Crop zooms the screenshot around the clicked control so the annotation stays readable. Turn it off to keep the entire visible tab."}},
+            {"@type": "Question", "name": "Does recording work across page navigation?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Recording continues across in-session navigation on the site you are documenting. Stop recording from the popup when the walkthrough is done."}},
+            {"@type": "Question", "name": "Can I edit AI-generated step text?", "acceptedAnswer": {"@type": "Answer", "text": "Yes. Every step title and instruction is editable. You can also reorder or delete steps before you export."}}
           ]
         }
       ]
@@ -94,6 +187,7 @@
                 <li class="nav-item"><a href="privacy.html" class="nav-link">Privacy</a></li>
                 <li class="nav-item"><a href="../index.html#contact" class="nav-link">Contact</a></li>
             </ul>
+            <button class="theme-toggle" aria-label="Toggle light/dark mode" aria-pressed="false" title="Toggle theme"><i class="fas fa-sun"></i></button>
             <div class="hamburger" aria-label="Toggle navigation"><span class="bar"></span><span class="bar"></span><span class="bar"></span></div>
         </div>
     </nav>
@@ -114,6 +208,24 @@
                     <p style="margin-top:12px; color: var(--muted); font-size: 14px;"><strong>Free forever · No signup · Local-first · BYO OpenRouter key</strong></p>
                 </div>
                 <img src="promo.png" width="440" height="280" alt="DocGen Studio promo: record, annotate, export">
+            </div>
+        </section>
+
+        <!-- Demo Preview Section -->
+        <section id="demo" class="demo-preview" aria-labelledby="demo-title">
+            <div class="container">
+                <h2 id="demo-title" class="section-title" style="text-align:center; margin-bottom:8px;">See it in action</h2>
+                <p style="text-align:center; color: var(--muted); margin-bottom:24px;">Watch a 15-second walkthrough of the full capture → annotate → export flow</p>
+                <div class="demo-video" style="max-width:800px; margin:0 auto; border-radius:12px; overflow:hidden; border:1px solid var(--border); background:var(--code-bg);">
+                    <div style="aspect-ratio: 16/9; display:flex; align-items:center; justify-content:center; color:var(--muted); background:var(--code-bg);">
+                        <div style="text-align:center; padding:24px;">
+                            <i class="fas fa-play-circle" style="font-size:48px; color:var(--primary-400); margin-bottom:12px; cursor:pointer;" aria-label="Play demo"></i>
+                            <p style="font-size:16px; font-weight:500;">Demo video (add your .webm/.mp4)</p>
+                            <p style="font-size:13px; margin-top:8px;">Replace this placeholder with a 15s screen recording of the extension in action</p>
+                        </div>
+                    </div>
+                </div>
+                <p style="text-align:center; margin-top:12px; font-size:13px; color:var(--muted);"><a href="how-to-use.html#step-3-record" style="color:var(--primary-400);">View step-by-step screenshots in the full guide →</a></p>
             </div>
         </section>
 
@@ -215,6 +327,70 @@
                     <a href="how-to-use.html#step-7-export"><img src="guide/10-export-buttons.png" width="640" height="400" alt="Export a how-to guide as Markdown or PDF"></a>
                 </div>
                 <p style="margin-top:16px"><a href="how-to-use.html">Open the full how-to guide with screenshots</a></p>
+            </div>
+        </section>
+
+        <!-- Interactive FAQ Accordion -->
+        <section id="faq" class="faq-accordion" aria-labelledby="faq-title" itemscope itemtype="https://schema.org/FAQPage">
+            <div class="container">
+                <h2 id="faq-title" class="section-title" style="text-align:center;">Frequently Asked Questions</h2>
+                <p style="text-align:center; color: var(--muted); margin-bottom:24px; max-width:600px; margin-left:auto; margin-right:auto;">Quick answers to common questions. Can't find what you need? <a href="how-to-use.html" style="color:var(--primary-400);">Read the full guide</a> or <a href="../index.html#contact" style="color:var(--primary-400);">contact us</a>.</p>
+                <div class="faq-list" style="max-width:720px; margin:0 auto;">
+                    <details class="faq-item" itemscope itemtype="https://schema.org/Question" itemprop="mainEntity">
+                        <summary itemprop="name">Is DocGen Studio free?</summary>
+                        <div class="faq-answer" itemscope itemtype="https://schema.org/Answer" itemprop="acceptedAnswer">
+                            <p itemprop="text">Yes, DocGen Studio is completely free. No subscription, no account required, no hidden fees. Optional OpenRouter API key enables AI-assisted drafting (you can use free models on OpenRouter).</p>
+                        </div>
+                    </details>
+                    <details class="faq-item" itemscope itemtype="https://schema.org/Question" itemprop="mainEntity">
+                        <summary itemprop="name">What browsers does DocGen Studio support?</summary>
+                        <div class="faq-answer" itemscope itemtype="https://schema.org/Answer" itemprop="acceptedAnswer">
+                            <p itemprop="text">DocGen Studio is a Chrome extension. It works on Chrome, Edge, Brave, and other Chromium-based browsers. Firefox and Safari are not supported at this time.</p>
+                        </div>
+                    </details>
+                    <details class="faq-item" itemscope itemtype="https://schema.org/Question" itemprop="mainEntity">
+                        <summary itemprop="name">Does DocGen Studio send my data anywhere?</summary>
+                        <div class="faq-answer" itemscope itemtype="https://schema.org/Answer" itemprop="acceptedAnswer">
+                            <p itemprop="text">No. All recording, screenshots, and editing happen locally in your browser. Only click labels (e.g., "user clicked a button labeled Save") are sent to OpenRouter if you add an API key. Screenshots never leave your device. See our <a href="privacy.html">privacy policy</a> for details.</p>
+                        </div>
+                    </details>
+                    <details class="faq-item" itemscope itemtype="https://schema.org/Question" itemprop="mainEntity">
+                        <summary itemprop="name">Can I export both PDF and Markdown?</summary>
+                        <div class="faq-answer" itemscope itemtype="https://schema.org/Answer" itemprop="acceptedAnswer">
+                            <p itemprop="text">Yes. Export Markdown for version control (GitHub, Notion, GitLab, Obsidian) or PDF for sharing with non-technical stakeholders. Both formats include annotated screenshots.</p>
+                        </div>
+                    </details>
+                    <details class="faq-item" itemscope itemtype="https://schema.org/Question" itemprop="mainEntity">
+                        <summary itemprop="name">How does DocGen Studio differ from Scribe, Guidde, or Tango?</summary>
+                        <div class="faq-answer" itemscope itemtype="https://schema.org/Answer" itemprop="acceptedAnswer">
+                            <p itemprop="text">DocGen Studio is free, local-first, developer-focused, and lets you bring your own OpenRouter API key. No cloud dependency, no per-seat pricing, no mandatory AI credits. You own your data and your workflow. See our <a href="../compare/docgen-vs-alternatives/">detailed comparison</a>.</p>
+                        </div>
+                    </details>
+                    <details class="faq-item" itemscope itemtype="https://schema.org/Question" itemprop="mainEntity">
+                        <summary itemprop="name">Does DocGen Studio require an account?</summary>
+                        <div class="faq-answer" itemscope itemtype="https://schema.org/Answer" itemprop="acceptedAnswer">
+                            <p itemprop="text">No. Install and record immediately. No signup, no email, no team workspace to configure. All data stays in your browser's local storage.</p>
+                        </div>
+                    </details>
+                    <details class="faq-item" itemscope itemtype="https://schema.org/Question" itemprop="mainEntity">
+                        <summary itemprop="name">What is Focused Crop (60%)?</summary>
+                        <div class="faq-answer" itemscope itemtype="https://schema.org/Answer" itemprop="acceptedAnswer">
+                            <p itemprop="text">Focused Crop zooms the screenshot around the clicked control so the annotation stays readable in dense UIs. Turn it off to keep the entire visible tab. Essential for complex dashboards.</p>
+                        </div>
+                    </details>
+                    <details class="faq-item" itemscope itemtype="https://schema.org/Question" itemprop="mainEntity">
+                        <summary itemprop="name">Does recording work across page navigation?</summary>
+                        <div class="faq-answer" itemscope itemtype="https://schema.org/Answer" itemprop="acceptedAnswer">
+                            <p itemprop="text">Yes. Recording continues across in-session navigation on the site you are documenting. Stop recording from the popup when the walkthrough is done.</p>
+                        </div>
+                    </details>
+                    <details class="faq-item" itemscope itemtype="https://schema.org/Question" itemprop="mainEntity">
+                        <summary itemprop="name">Can I edit AI-generated step text?</summary>
+                        <div class="faq-answer" itemscope itemtype="https://schema.org/Answer" itemprop="acceptedAnswer">
+                            <p itemprop="text">Yes. Every step title and instruction is fully editable. You can also reorder or delete steps before you export. AI is a starting point — you control the final output.</p>
+                        </div>
+                    </details>
+                </div>
             </div>
         </section>
 
